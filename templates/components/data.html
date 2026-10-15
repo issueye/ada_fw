@@ -1,0 +1,193 @@
+{# ==========================================================================
+   Card · 卡片容器（带 caller 插槽）
+   用法：
+     {% call data.render(title="标题", subtitle="副标题") %}
+       <p>内容</p>
+     {% endcall %}
+   ========================================================================== #}
+{% macro render(title="", subtitle="", actions="") %}
+<section class="card p-6">
+  {% if title or subtitle or actions %}
+  <header class="mb-4 flex items-start justify-between gap-4">
+    <div>
+      {% if title %}<h3 class="text-base font-semibold text-content">{{ title }}</h3>{% endif %}
+      {% if subtitle %}<p class="mt-1 text-sm text-content-secondary">{{ subtitle }}</p>{% endif %}
+    </div>
+    {% if actions %}<div class="flex shrink-0 items-center gap-2">{{ actions | safe }}</div>{% endif %}
+  </header>
+  {% endif %}
+  {{ caller() }}
+</section>
+{% endmacro %}
+
+
+{# ==========================================================================
+   Table · 数据表格
+   参数：
+     columns - [{ key, label, align, width, sortable }]
+     rows    - [{ ...字段 }]
+     empty_text - 空态文案
+     loading - 是否加载中
+     selectable - 是否显示选择列
+   ========================================================================== #}
+{% macro table(columns=[], rows=[], empty_text="暂无数据", loading=false, selectable=false) %}
+<div class="overflow-hidden rounded-lg border border-border bg-surface">
+  <div class="overflow-x-auto">
+    <table class="table-base">
+      <thead>
+        <tr>
+          {% if selectable %}
+          <th class="w-12">
+            <input type="checkbox"
+                   class="h-4 w-4 rounded-sm border-border-strong text-primary focus:ring-2 focus:ring-primary/30"
+                   aria-label="全选">
+          </th>
+          {% endif %}
+          {% for col in columns %}
+          <th {% if col.width %}style="width: {{ col.width }}"{% endif %}
+              class="{% if col.align == 'right' %}text-right{% elif col.align == 'center' %}text-center{% endif %}">
+            {% if col.sortable %}
+            <button type="button" class="inline-flex items-center gap-1 transition-colors duration-fast hover:text-content">
+              {{ col.label }}
+              <svg class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path d="M10 3a.75.75 0 01.55.24l3.25 3.5a.75.75 0 11-1.1 1.02L10 4.852 7.3 7.76a.75.75 0 01-1.1-1.02l3.25-3.5A.75.75 0 0110 3zm-3.76 9.2a.75.75 0 011.06.04l2.7 2.908 2.7-2.908a.75.75 0 111.1 1.02l-3.25 3.5a.75.75 0 01-1.1 0l-3.25-3.5a.75.75 0 01.04-1.06z"/>
+              </svg>
+            </button>
+            {% else %}
+            {{ col.label }}
+            {% endif %}
+          </th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% if loading %}
+          {% for i in range(5) %}
+          <tr>
+            {% if selectable %}<td><div class="skeleton-shimmer h-4 w-4 rounded-sm bg-surface-hover"></div></td>{% endif %}
+            {% for col in columns %}
+            <td><div class="skeleton-shimmer h-4 rounded-sm bg-surface-hover" style="width: {{ 40 + (i * 13) % 50 }}%"></div></td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        {% elif rows | length == 0 %}
+          <tr>
+            <td colspan="{{ columns | length + (1 if selectable else 0) }}">
+              <div class="flex flex-col items-center justify-center py-12 text-center">
+                <svg class="mb-3 h-10 w-10 text-content-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+                </svg>
+                <p class="text-sm text-content-muted">{{ empty_text }}</p>
+              </div>
+            </td>
+          </tr>
+        {% else %}
+          {% for row in rows %}
+          <tr>
+            {% if selectable %}
+            <td>
+              <input type="checkbox"
+                     class="h-4 w-4 rounded-sm border-border-strong text-primary focus:ring-2 focus:ring-primary/30"
+                     aria-label="选择行">
+            </td>
+            {% endif %}
+            {% for col in columns %}
+            <td class="{% if col.align == 'right' %}text-right{% elif col.align == 'center' %}text-center{% endif %}">
+              {{ row[col.key] | safe }}
+            </td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endmacro %}
+
+
+{# ==========================================================================
+   Form · 表单容器
+   用法：
+     {% call data.form(action="/submit", method="post") %}
+       ...字段...
+     {% endcall %}
+   ========================================================================== #}
+{% macro form(action="", method="post", layout="vertical", attrs="") %}
+<form action="{{ action | safe }}" method="{{ method }}"
+      class="{% if layout == 'horizontal' %}space-y-6{% else %}space-y-5{% endif %}"
+      {{ attrs | safe }}>
+  {{ caller() }}
+</form>
+{% endmacro %}
+
+
+{# 表单分组 #}
+{% macro group(title="", description="") %}
+<fieldset class="space-y-4">
+  {% if title %}
+  <legend class="text-sm font-semibold text-content">{{ title }}</legend>
+  {% endif %}
+  {% if description %}
+  <p class="text-xs text-content-muted">{{ description }}</p>
+  {% endif %}
+  {{ caller() }}
+</fieldset>
+{% endmacro %}
+
+
+{# 表单操作区 #}
+{% macro actions() %}
+<div class="flex items-center justify-end gap-2 border-t border-border pt-5">
+  {{ caller() }}
+</div>
+{% endmacro %}
+
+
+{# ==========================================================================
+   StatCard · 指标卡
+   参数：
+     label     - 指标名称
+     value     - 指标值
+     trend     - 趋势值，如 "+12.5%"
+     trend_up  - 是否上升（决定颜色）
+     icon      - 图标 SVG
+     variant   - 图标底色变体
+   ========================================================================== #}
+{% macro stat_card(label, value, trend="", trend_up=true, icon="", variant="primary") %}
+{%- set variants = {
+  "primary": "bg-primary-subtle text-primary",
+  "success": "bg-success-subtle text-success",
+  "warning": "bg-warning-subtle text-warning",
+  "danger":  "bg-danger-subtle text-danger",
+  "info":    "bg-info-subtle text-info"
+} -%}
+<div class="card p-6">
+  <div class="flex items-start justify-between gap-4">
+    <div class="min-w-0 flex-1">
+      <p class="truncate text-sm text-content-secondary">{{ label }}</p>
+      <p class="mt-2 text-2xl font-semibold tabular text-content">{{ value }}</p>
+      {% if trend %}
+      <div class="mt-2 flex items-center gap-1 text-xs">
+        <span class="inline-flex items-center gap-0.5 font-medium {% if trend_up %}text-success{% else %}text-danger{% endif %}">
+          <svg class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            {% if trend_up %}
+            <path fill-rule="evenodd" d="M10 17a.75.75 0 01-.75-.75V5.612L5.29 9.77a.75.75 0 01-1.08-1.04l5.25-5.5a.75.75 0 011.08 0l5.25 5.5a.75.75 0 11-1.08 1.04l-3.96-4.158V16.25A.75.75 0 0110 17z" clip-rule="evenodd"/>
+            {% else %}
+            <path fill-rule="evenodd" d="M10 3a.75.75 0 01.75.75v10.638l3.96-4.158a.75.75 0 111.08 1.04l-5.25 5.5a.75.75 0 01-1.08 0l-5.25-5.5a.75.75 0 111.08-1.04l3.96 4.158V3.75A.75.75 0 0110 3z" clip-rule="evenodd"/>
+            {% endif %}
+          </svg>
+          {{ trend }}
+        </span>
+        <span class="text-content-muted">较上期</span>
+      </div>
+      {% endif %}
+    </div>
+    {% if icon %}
+    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg {{ variants[variant] | default(variants['primary']) }}">
+      <span class="h-5 w-5" aria-hidden="true">{{ icon | safe }}</span>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endmacro %}

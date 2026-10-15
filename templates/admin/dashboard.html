@@ -1,0 +1,91 @@
+{% extends "layouts/admin.html" %}
+
+{% import "components/data.html" as data %}
+{% import "components/display.html" as display %}
+
+{% block content %}
+<div class="space-y-6">
+  {# 页面标题 #}
+  <div>
+    <h1 class="text-2xl font-semibold tracking-tight text-content">仪表盘</h1>
+    <p class="mt-1 text-sm text-content-secondary">欢迎回来，这里是系统概览。</p>
+  </div>
+
+  {# 指标卡 #}
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    {% for stat in stats %}
+    {{ data.stat_card(
+      label=stat.label,
+      value=stat.value,
+      trend=stat.trend,
+      trend_up=stat.trend_up,
+      icon=stat.icon,
+      variant=stat.variant
+    ) }}
+    {% endfor %}
+  </div>
+
+  {# 双栏：最近用户 + 活动流 #}
+  <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+    {# 最近用户 #}
+    <div class="lg:col-span-2">
+      {% call data.render(title="最近用户", subtitle="最新注册的 5 位用户") %}
+      <div class="overflow-x-auto">
+        <table class="table-base">
+          <thead>
+            <tr>
+              <th>用户</th>
+              <th>角色</th>
+              <th>状态</th>
+              <th>注册日期</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for user in recent_users %}
+            <tr>
+              <td>
+                <div class="flex items-center gap-3">
+                  {{ display.avatar(name=user.name, size="sm") }}
+                  <div class="min-w-0">
+                    <p class="truncate font-medium text-content">{{ user.name }}</p>
+                    <p class="truncate text-xs text-content-muted">{{ user.email }}</p>
+                  </div>
+                </div>
+              </td>
+              <td>{{ display.badge(text=user.role_label, variant=user.role_variant) }}</td>
+              <td>{{ display.badge(text=user.status_label, variant=user.status_variant) }}</td>
+              <td class="tabular text-content-secondary">{{ user.created_at }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endcall %}
+    </div>
+
+    {# 活动流 #}
+    {% call data.render(title="最近活动", subtitle="系统操作记录") %}
+    <ul class="space-y-4">
+      {% for act in activities %}
+      <li class="flex gap-3">
+        <span class="mt-1.5 h-2 w-2 shrink-0 rounded-full
+          {% if act.variant == 'success' %}bg-success
+          {% elif act.variant == 'danger' %}bg-danger
+          {% elif act.variant == 'warning' %}bg-warning
+          {% elif act.variant == 'primary' %}bg-primary
+          {% else %}bg-info{% endif %}"></span>
+        <div class="min-w-0 flex-1">
+          <p class="text-sm text-content">
+            <span class="font-medium">{{ act.user }}</span>
+            <span class="text-content-secondary">{{ act.action }}</span>
+            <span class="font-medium">{{ act.target }}</span>
+          </p>
+          <p class="mt-0.5 text-xs text-content-muted">{{ act.time }}</p>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+    {% endcall %}
+  </div>
+</div>
+{% endblock %}

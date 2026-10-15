@@ -1,0 +1,152 @@
+{% extends "layouts/admin.html" %}
+
+{% import "components/data.html" as data %}
+{% import "components/display.html" as display %}
+{% import "components/button.html" as button %}
+{% import "components/input.html" as input %}
+{% import "components/form-controls.html" as fc %}
+{% import "components/navigation.html" as nav %}
+
+{% block content %}
+<div class="space-y-6" x-data="{ tab: 'profile' }">
+  <div>
+    <h1 class="text-2xl font-semibold tracking-tight text-content">设置</h1>
+    <p class="mt-1 text-sm text-content-secondary">管理你的账号偏好与系统配置。</p>
+  </div>
+
+  {# 标签页 #}
+  {{ nav.tabs(
+    name="tab",
+    variant="underline",
+    items=[
+      {"id": "profile", "label": "个人资料", "active": true},
+      {"id": "security", "label": "安全设置"},
+      {"id": "notifications", "label": "通知偏好", "badge": "3"},
+      {"id": "appearance", "label": "外观"}
+    ]
+  ) }}
+
+  {# 个人资料 #}
+  <div x-show="tab === 'profile'" x-cloak>
+    {% call data.render(title="个人资料", subtitle="这些信息将展示在你的公开主页上") %}
+    <div class="mb-6 flex items-center gap-4">
+      {{ display.avatar(name="张伟", size="lg", status="online") }}
+      <div>
+        <p class="text-sm font-medium text-content">头像</p>
+        <p class="mt-0.5 text-xs text-content-muted">支持 JPG、PNG，最大 2MB</p>
+        <div class="mt-2 flex gap-2">
+          {{ button.render(label="更换头像", variant="outline", size="sm") }}
+          {{ button.render(label="移除", variant="ghost", size="sm") }}
+        </div>
+      </div>
+    </div>
+
+    {% call data.group() %}
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {{ input.render(name="s_name", label="姓名", value="张伟", required=true) }}
+        {{ input.render(name="s_email", label="邮箱", type="email", value="zhangwei@example.com", required=true) }}
+      </div>
+      {{ input.render(name="s_phone", label="手机号", value="138 0013 8000", hint="用于接收重要通知") }}
+      {{ input.textarea(name="s_bio", label="个人简介", value="负责平台架构与基础设施建设。", rows=3) }}
+    {% endcall %}
+
+    {% call data.actions() %}
+      {{ button.render(label="重置", variant="outline") }}
+      {{ button.render(label="保存更改", variant="primary") }}
+    {% endcall %}
+    {% endcall %}
+  </div>
+
+  {# 安全设置 #}
+  <div x-show="tab === 'security'" x-cloak>
+    {% call data.render(title="安全设置", subtitle="保护你的账号安全") %}
+    <div class="space-y-6">
+      {% call data.group(title="修改密码") %}
+        {{ input.render(name="old_pwd", label="当前密码", type="password", placeholder="请输入当前密码") }}
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {{ input.render(name="new_pwd", label="新密码", type="password", placeholder="至少 8 位", hint="包含大小写字母与数字") }}
+          {{ input.render(name="confirm_pwd", label="确认新��码", type="password", placeholder="再次输入新密码") }}
+        </div>
+      {% endcall %}
+
+      <div class="border-t border-border pt-6">
+        {{ fc.switch(name="two_factor", label="双因素���证", checked=true, hint="登录时需要额外验证码") }}
+      </div>
+
+      <div class="border-t border-border pt-6">
+        {% call display.alert(title="登录设备", variant="info") %}
+          当前有 2 台设备处于登录状态。如发现异常，请立即修改密码。
+        {% endcall %}
+      </div>
+    </div>
+
+    {% call data.actions() %}
+      {{ button.render(label="保存", variant="primary") }}
+    {% endcall %}
+    {% endcall %}
+  </div>
+
+  {# 通知偏好 #}
+  <div x-show="tab === 'notifications'" x-cloak>
+    {% call data.render(title="通知偏好", subtitle="选择你希望接收的通知类型") %}
+    <div class="space-y-5">
+      {{ fc.switch(name="n_email", label="邮件通知", checked=true, hint="重要事件通过邮件发送") }}
+      {{ fc.switch(name="n_sms", label="短信通知", hint="仅用于安全相关提醒") }}
+      {{ fc.switch(name="n_push", label="站内推送", checked=true, hint="浏览器实时推送") }}
+      {{ fc.switch(name="n_weekly", label="每周摘要", checked=true, hint="每周一发送上周数据汇总") }}
+      {{ fc.switch(name="n_marketing", label="产品动态", hint="新功能与活动信息") }}
+    </div>
+
+    {% call data.actions() %}
+      {{ button.render(label="保存偏好", variant="primary") }}
+    {% endcall %}
+    {% endcall %}
+  </div>
+
+  {# 外观 #}
+  <div x-show="tab === 'appearance'" x-cloak>
+    {% call data.render(title="外观", subtitle="自定义界面显示方式") %}
+    <div class="space-y-6">
+      {% call data.group(title="主题模式", description="选择界面配色方案") %}
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <button type="button" @click="theme = 'light'; document.documentElement.setAttribute('data-theme', 'light'); localStorage.setItem('ada-theme', 'light')"
+                class="rounded-lg border-2 p-4 text-left transition-colors duration-base focus-ring"
+                :class="theme === 'light' ? 'border-primary bg-primary-subtle' : 'border-border hover:border-border-strong'">
+          <div class="mb-3 h-16 rounded-md border border-border bg-white"></div>
+          <p class="text-sm font-medium text-content">浅色</p>
+          <p class="mt-0.5 text-xs text-content-muted">明亮清爽</p>
+        </button>
+
+        <button type="button" @click="theme = 'dark'; document.documentElement.setAttribute('data-theme', 'dark'); localStorage.setItem('ada-theme', 'dark')"
+                class="rounded-lg border-2 p-4 text-left transition-colors duration-base focus-ring"
+                :class="theme === 'dark' ? 'border-primary bg-primary-subtle' : 'border-border hover:border-border-strong'">
+          <div class="mb-3 h-16 rounded-md border border-slate-700 bg-slate-900"></div>
+          <p class="text-sm font-medium text-content">暗色</p>
+          <p class="mt-0.5 text-xs text-content-muted">护眼省电</p>
+        </button>
+
+        <button type="button"
+                class="rounded-lg border-2 border-border p-4 text-left transition-colors duration-base hover:border-border-strong focus-ring">
+          <div class="mb-3 h-16 rounded-md border border-border bg-gradient-to-r from-white to-slate-900"></div>
+          <p class="text-sm font-medium text-content">跟随系统</p>
+          <p class="mt-0.5 text-xs text-content-muted">自动切换</p>
+        </button>
+      </div>
+      {% endcall %}
+
+      {% call data.group(title="界面密度") %}
+      {{ fc.radio(
+        name="density",
+        inline=true,
+        options=[
+          {"value": "compact", "label": "紧凑"},
+          {"value": "default", "label": "默认", "checked": true},
+          {"value": "relaxed", "label": "宽松"}
+        ]
+      ) }}
+      {% endcall %}
+    </div>
+    {% endcall %}
+  </div>
+</div>
+{% endblock %}

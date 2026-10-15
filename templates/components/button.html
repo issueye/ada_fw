@@ -1,0 +1,62 @@
+{# ==========================================================================
+   Button · 按钮
+   参数：
+     label     - 按钮文字
+     variant   - primary | secondary | outline | ghost | danger（默认 primary）
+     size      - sm | md | lg（默认 md）
+     type      - button | submit | reset（默认 button）
+     icon      - 图标 SVG 片段（可选，置于文字左侧）
+     loading   - 是否加载中（默认 false）
+     disabled  - 是否禁用（默认 false）
+     attrs     - 透传的额外属性（可选）
+   ========================================================================== #}
+{% macro render(label="", variant="primary", size="md", type="button", icon="", loading=false, disabled=false, attrs="") %}
+{%- set base = "inline-flex items-center justify-center gap-2 rounded-md font-medium transition-colors duration-base focus-ring disabled:cursor-not-allowed disabled:opacity-50" -%}
+{%- set sizes = {
+  "sm": "h-8 px-3 text-xs",
+  "md": "h-9 px-4 text-sm",
+  "lg": "h-11 px-6 text-base"
+} -%}
+{%- set variants = {
+  "primary":   "bg-primary text-primary-fg hover:bg-primary-hover active:bg-primary-active shadow-xs",
+  "secondary": "bg-surface-hover text-content hover:bg-surface-active border border-border",
+  "outline":   "border border-border-strong bg-surface text-content hover:bg-surface-hover",
+  "ghost":     "text-content-secondary hover:bg-surface-hover hover:text-content",
+  "danger":    "bg-danger text-danger-fg hover:bg-danger-hover shadow-xs"
+} -%}
+<button type="{{ type }}"
+        class="{{ base }} {{ sizes[size] | default(sizes['md']) }} {{ variants[variant] | default(variants['primary']) }}"
+        {% if loading or disabled %}disabled{% endif %}
+        {% if loading %}aria-busy="true"{% endif %}
+        {{ attrs | safe }}>
+  {% if loading %}
+  <svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+  </svg>
+  {% elif icon %}
+  <span class="h-4 w-4 shrink-0" aria-hidden="true">{{ icon | safe }}</span>
+  {% endif %}
+  {% if label %}<span>{{ label }}</span>{% endif %}
+</button>
+{% endmacro %}
+
+
+{# 图标按钮：仅图标，需提供 aria_label #}
+{% macro icon_only(icon, aria_label, variant="ghost", size="md", attrs="") %}
+{%- set base = "inline-flex items-center justify-center rounded-md transition-colors duration-base focus-ring disabled:cursor-not-allowed disabled:opacity-50" -%}
+{%- set sizes = { "sm": "h-8 w-8", "md": "h-9 w-9", "lg": "h-11 w-11" } -%}
+{%- set variants = {
+  "primary":   "bg-primary text-primary-fg hover:bg-primary-hover",
+  "secondary": "bg-surface-hover text-content hover:bg-surface-active border border-border",
+  "outline":   "border border-border-strong bg-surface text-content hover:bg-surface-hover",
+  "ghost":     "text-content-secondary hover:bg-surface-hover hover:text-content",
+  "danger":    "bg-danger text-danger-fg hover:bg-danger-hover"
+} -%}
+<button type="button"
+        aria-label="{{ aria_label }}"
+        class="{{ base }} {{ sizes[size] | default(sizes['md']) }} {{ variants[variant] | default(variants['ghost']) }}"
+        {{ attrs | safe }}>
+  <span class="h-4 w-4" aria-hidden="true">{{ icon | safe }}</span>
+</button>
+{% endmacro %}

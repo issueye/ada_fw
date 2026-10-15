@@ -1,0 +1,19 @@
+{# 顶部导航组件 #}
+{% macro render(items, active) %}
+<header class="border-b border-slate-200 bg-white/80 backdrop-blur sticky top-0 z-10">
+  <nav class="mx-auto flex max-w-4xl items-center gap-6 px-4 py-3">
+    <a href="/" class="text-lg font-semibold tracking-tight text-indigo-600">Ada</a>
+    <ul class="flex items-center gap-1">
+      {% for item in items %}
+      <li>
+        <a href="{{ item.href | safe }}"
+           class="rounded-md px-3 py-1.5 text-sm transition
+                  {% if item.href == active %}bg-indigo-50 text-indigo-700 font-medium{% else %}text-slate-600 hover:bg-slate-100{% endif %}">
+          {{ item.label }}
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+  </nav>
+</header>
+{% endmacro %}

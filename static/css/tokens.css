@@ -1,0 +1,198 @@
+/* ==========================================================================
+   Ada Design System · 设计令牌
+   语义令牌层：业务代码只使用这一层，不直接引用基础色阶。
+   通过 <html data-theme="dark"> 切换暗色模式。
+   ========================================================================== */
+
+:root {
+  /* ---- 主色（Indigo） ---- */
+  --color-primary-subtle: #eef2ff;
+  --color-primary-muted: #c7d2fe;
+  --color-primary: #4f46e5;
+  --color-primary-hover: #4338ca;
+  --color-primary-active: #3730a3;
+  --color-primary-fg: #ffffff;
+
+  /* ---- 中性色 ---- */
+  --color-bg: #f8fafc;
+  --color-surface: #ffffff;
+  --color-surface-hover: #f1f5f9;
+  --color-surface-active: #e2e8f0;
+  --color-border: #e2e8f0;
+  --color-border-strong: #cbd5e1;
+  --color-text: #0f172a;
+  --color-text-secondary: #475569;
+  --color-text-muted: #94a3b8;
+  --color-text-inverse: #ffffff;
+
+  /* ---- 功能色 ---- */
+  --color-success-subtle: #f0fdf4;
+  --color-success-muted: #bbf7d0;
+  --color-success: #16a34a;
+  --color-success-fg: #ffffff;
+
+  --color-warning-subtle: #fffbeb;
+  --color-warning-muted: #fde68a;
+  --color-warning: #d97706;
+  --color-warning-fg: #ffffff;
+
+  --color-danger-subtle: #fef2f2;
+  --color-danger-muted: #fecaca;
+  --color-danger: #dc2626;
+  --color-danger-hover: #b91c1c;
+  --color-danger-fg: #ffffff;
+
+  --color-info-subtle: #f0f9ff;
+  --color-info-muted: #bae6fd;
+  --color-info: #0284c7;
+  --color-info-fg: #ffffff;
+
+  /* ---- 圆角 ---- */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+
+  /* ---- 阴影 ---- */
+  --shadow-xs: 0 1px 2px 0 rgb(15 23 42 / 0.04);
+  --shadow-sm: 0 1px 3px 0 rgb(15 23 42 / 0.08), 0 1px 2px -1px rgb(15 23 42 / 0.06);
+  --shadow-md: 0 4px 6px -1px rgb(15 23 42 / 0.08), 0 2px 4px -2px rgb(15 23 42 / 0.06);
+  --shadow-lg: 0 10px 15px -3px rgb(15 23 42 / 0.10), 0 4px 6px -4px rgb(15 23 42 / 0.06);
+  --shadow-xl: 0 20px 25px -5px rgb(15 23 42 / 0.12), 0 8px 10px -6px rgb(15 23 42 / 0.06);
+
+  /* ---- 动效 ---- */
+  --duration-fast: 100ms;
+  --duration-base: 150ms;
+  --duration-slow: 250ms;
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ---- 布局 ---- */
+  --sidebar-width: 240px;
+  --sidebar-width-collapsed: 64px;
+  --topbar-height: 56px;
+}
+
+/* ==========================================================================
+   暗色模式
+   ========================================================================== */
+
+[data-theme="dark"] {
+  /* ---- 主色 ---- */
+  --color-primary-subtle: #312e81;
+  --color-primary-muted: #4338ca;
+  --color-primary: #6366f1;
+  --color-primary-hover: #818cf8;
+  --color-primary-active: #a5b4fc;
+  --color-primary-fg: #ffffff;
+
+  /* ---- 中性色 ---- */
+  --color-bg: #0f172a;
+  --color-surface: #1e293b;
+  --color-surface-hover: #334155;
+  --color-surface-active: #475569;
+  --color-border: #334155;
+  --color-border-strong: #475569;
+  --color-text: #f1f5f9;
+  --color-text-secondary: #cbd5e1;
+  --color-text-muted: #64748b;
+  --color-text-inverse: #0f172a;
+
+  /* ---- 功能色 ---- */
+  --color-success-subtle: #052e16;
+  --color-success-muted: #166534;
+  --color-success: #22c55e;
+  --color-success-fg: #052e16;
+
+  --color-warning-subtle: #451a03;
+  --color-warning-muted: #92400e;
+  --color-warning: #f59e0b;
+  --color-warning-fg: #451a03;
+
+  --color-danger-subtle: #450a0a;
+  --color-danger-muted: #991b1b;
+  --color-danger: #ef4444;
+  --color-danger-hover: #f87171;
+  --color-danger-fg: #450a0a;
+
+  --color-info-subtle: #082f49;
+  --color-info-muted: #075985;
+  --color-info: #38bdf8;
+  --color-info-fg: #082f49;
+
+  /* ---- 阴影：暗色下减弱，改用边框区分层级 ---- */
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.20);
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.30), 0 1px 2px -1px rgb(0 0 0 / 0.20);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.35), 0 2px 4px -2px rgb(0 0 0 / 0.25);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.40), 0 4px 6px -4px rgb(0 0 0 / 0.30);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.45), 0 8px 10px -6px rgb(0 0 0 / 0.35);
+}
+
+/* ==========================================================================
+   基础样式
+   ========================================================================== */
+
+* {
+  border-color: var(--color-border);
+}
+
+html {
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: "Inter", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 20px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 数字对齐 */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* 隐藏 Alpine 初始化前的元素 */
+[x-cloak] {
+  display: none !important;
+}
+
+/* 滚动条美化 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-strong);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
+
+/* 焦点环统一 */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* 尊重用户的动效偏好 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

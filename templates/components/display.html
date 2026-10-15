@@ -1,0 +1,229 @@
+{# ==========================================================================
+   Card · 卡片
+   用法：
+     {% call card.render(title="标题", subtitle="副标题") %}
+       <p>内容</p>
+     {% endcall %}
+   ========================================================================== #}
+{% macro render(title="", subtitle="", padding="p-6", hover=false, attrs="") %}
+<section class="card {{ padding }} {% if hover %}transition-shadow duration-base hover:shadow-md{% endif %}" {{ attrs | safe }}>
+  {% if title or subtitle %}
+  <header class="mb-4">
+    {% if title %}<h3 class="text-base font-semibold text-content">{{ title }}</h3>{% endif %}
+    {% if subtitle %}<p class="mt-1 text-sm text-content-secondary">{{ subtitle }}</p>{% endif %}
+  </header>
+  {% endif %}
+  {{ caller() }}
+</section>
+{% endmacro %}
+
+
+{# 带操作区的卡片 #}
+{% macro with_actions(title="", subtitle="", actions="") %}
+<section class="card p-6">
+  <header class="mb-4 flex items-start justify-between gap-4">
+    <div>
+      {% if title %}<h3 class="text-base font-semibold text-content">{{ title }}</h3>{% endif %}
+      {% if subtitle %}<p class="mt-1 text-sm text-content-secondary">{{ subtitle }}</p>{% endif %}
+    </div>
+    {% if actions %}<div class="flex shrink-0 items-center gap-2">{{ actions | safe }}</div>{% endif %}
+  </header>
+  {{ caller() }}
+</section>
+{% endmacro %}
+
+
+{# ==========================================================================
+   Badge · 徽章（圆点 / 数字）
+   ========================================================================== #}
+{% macro badge(text="", variant="primary", dot=false) %}
+{%- set variants = {
+  "primary": "bg-primary-subtle text-primary",
+  "success": "bg-success-subtle text-success",
+  "warning": "bg-warning-subtle text-warning",
+  "danger":  "bg-danger-subtle text-danger",
+  "info":    "bg-info-subtle text-info",
+  "neutral": "bg-surface-hover text-content-secondary"
+} -%}
+{%- set dots = {
+  "primary": "bg-primary",
+  "success": "bg-success",
+  "warning": "bg-warning",
+  "danger":  "bg-danger",
+  "info":    "bg-info",
+  "neutral": "bg-content-muted"
+} -%}
+{% if dot %}
+<span class="inline-flex items-center gap-1.5 text-xs text-content-secondary">
+  <span class="h-1.5 w-1.5 rounded-full {{ dots[variant] | default(dots['neutral']) }}"></span>
+  {% if text %}{{ text }}{% endif %}
+</span>
+{% else %}
+<span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium {{ variants[variant] | default(variants['neutral']) }}">
+  {{ text }}
+</span>
+{% endif %}
+{% endmacro %}
+
+
+{# ==========================================================================
+   Tag · 标签（可关闭）
+   ========================================================================== #}
+{% macro tag(text, variant="neutral", closable=false, attrs="") %}
+{%- set variants = {
+  "primary": "border-primary-muted bg-primary-subtle text-primary",
+  "success": "border-success-muted bg-success-subtle text-success",
+  "warning": "border-warning-muted bg-warning-subtle text-warning",
+  "danger":  "border-danger-muted bg-danger-subtle text-danger",
+  "info":    "border-info-muted bg-info-subtle text-info",
+  "neutral": "border-border bg-surface-hover text-content-secondary"
+} -%}
+<span class="inline-flex items-center gap-1 rounded-sm border px-2 py-0.5 text-xs font-medium {{ variants[variant] | default(variants['neutral']) }}" {{ attrs | safe }}>
+  {{ text }}
+  {% if closable %}
+  <button type="button" class="ml-0.5 rounded-sm opacity-60 transition-opacity duration-fast hover:opacity-100" aria-label="移除">
+    <svg class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+      <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"/>
+    </svg>
+  </button>
+  {% endif %}
+</span>
+{% endmacro %}
+
+
+{# ==========================================================================
+   Avatar · 头像
+   ========================================================================== #}
+{% macro avatar(name="", src="", size="md", status="") %}
+{%- set sizes = { "xs": "h-6 w-6 text-xs", "sm": "h-8 w-8 text-xs", "md": "h-10 w-10 text-sm", "lg": "h-12 w-12 text-base" } -%}
+{%- set status_colors = { "online": "bg-success", "busy": "bg-danger", "away": "bg-warning", "offline": "bg-content-muted" } -%}
+<span class="relative inline-flex shrink-0">
+  {% if src %}
+  <img src="{{ src }}" alt="{{ name }}" class="rounded-full object-cover {{ sizes[size] | default(sizes['md']) }}">
+  {% else %}
+  <span class="inline-flex items-center justify-center rounded-full bg-primary-subtle font-medium text-primary {{ sizes[size] | default(sizes['md']) }}"
+        aria-label="{{ name }}">
+    {{ name[0] | upper }}
+  </span>
+  {% endif %}
+  {% if status %}
+  <span class="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-surface {{ status_colors[status] | default(status_colors['offline']) }}"></span>
+  {% endif %}
+</span>
+{% endmacro %}
+
+
+{# ==========================================================================
+   Alert · 提示条
+   ========================================================================== #}
+{% macro alert(title="", variant="info", dismissible=false) %}
+{%- set variants = {
+  "info":    {"wrap": "border-info-muted bg-info-subtle",       "icon": "text-info",    "title": "text-info"},
+  "success": {"wrap": "border-success-muted bg-success-subtle", "icon": "text-success", "title": "text-success"},
+  "warning": {"wrap": "border-warning-muted bg-warning-subtle", "icon": "text-warning", "title": "text-warning"},
+  "danger":  {"wrap": "border-danger-muted bg-danger-subtle",   "icon": "text-danger",  "title": "text-danger"}
+} -%}
+{%- set v = variants[variant] | default(variants['info']) -%}
+<div class="flex gap-3 rounded-lg border p-4 {{ v.wrap }}" role="alert">
+  <svg class="h-5 w-5 shrink-0 {{ v.icon }}" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+    {% if variant == "success" %}
+    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd"/>
+    {% elif variant == "warning" %}
+    <path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/>
+    {% elif variant == "danger" %}
+    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/>
+    {% else %}
+    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clip-rule="evenodd"/>
+    {% endif %}
+  </svg>
+  <div class="flex-1 space-y-1">
+    {% if title %}<p class="text-sm font-medium {{ v.title }}">{{ title }}</p>{% endif %}
+    <div class="text-sm text-content-secondary">{{ caller() }}</div>
+  </div>
+  {% if dismissible %}
+  <button type="button" class="shrink-0 text-content-muted transition-colors duration-fast hover:text-content" aria-label="关闭">
+    <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+      <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"/>
+    </svg>
+  </button>
+  {% endif %}
+</div>
+{% endmacro %}
+
+
+{# ==========================================================================
+   Progress · 进度条
+   ========================================================================== #}
+{% macro progress(value=0, max=100, variant="primary", size="md", show_label=false, label="") %}
+{%- set pct = (value / max * 100) | int -%}
+{%- set heights = { "sm": "h-1", "md": "h-2", "lg": "h-3" } -%}
+{%- set variants = {
+  "primary": "bg-primary",
+  "success": "bg-success",
+  "warning": "bg-warning",
+  "danger":  "bg-danger"
+} -%}
+<div class="space-y-1.5">
+  {% if show_label or label %}
+  <div class="flex items-center justify-between text-xs">
+    <span class="text-content-secondary">{{ label }}</span>
+    <span class="tabular text-content-muted">{{ pct }}%</span>
+  </div>
+  {% endif %}
+  <div class="w-full overflow-hidden rounded-full bg-surface-hover {{ heights[size] | default(heights['md']) }}"
+       role="progressbar" aria-valuenow="{{ value }}" aria-valuemin="0" aria-valuemax="{{ max }}">
+    <div class="h-full rounded-full transition-all duration-slow {{ variants[variant] | default(variants['primary']) }}"
+         style="width: {{ pct }}%"></div>
+  </div>
+</div>
+{% endmacro %}
+
+
+{# ==========================================================================
+   Skeleton · 骨架屏
+   ========================================================================== #}
+{% macro skeleton(variant="text", lines=3) %}
+{% if variant == "text" %}
+<div class="space-y-2">
+  {% for i in range(lines) %}
+  <div class="skeleton-shimmer h-4 rounded-sm bg-surface-hover {% if loop.last %}w-2/3{% else %}w-full{% endif %}"></div>
+  {% endfor %}
+</div>
+{% elif variant == "card" %}
+<div class="card p-6">
+  <div class="skeleton-shimmer mb-4 h-5 w-1/3 rounded-sm bg-surface-hover"></div>
+  <div class="space-y-2">
+    <div class="skeleton-shimmer h-4 w-full rounded-sm bg-surface-hover"></div>
+    <div class="skeleton-shimmer h-4 w-5/6 rounded-sm bg-surface-hover"></div>
+    <div class="skeleton-shimmer h-4 w-2/3 rounded-sm bg-surface-hover"></div>
+  </div>
+</div>
+{% elif variant == "table" %}
+<div class="space-y-3">
+  {% for i in range(lines) %}
+  <div class="flex items-center gap-4">
+    <div class="skeleton-shimmer h-4 w-1/4 rounded-sm bg-surface-hover"></div>
+    <div class="skeleton-shimmer h-4 w-1/3 rounded-sm bg-surface-hover"></div>
+    <div class="skeleton-shimmer h-4 w-1/5 rounded-sm bg-surface-hover"></div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+{% endmacro %}
+
+
+{# ==========================================================================
+   Empty · 空状态
+   ========================================================================== #}
+{% macro empty(title="暂无数据", description="", action="") %}
+<div class="flex flex-col items-center justify-center px-6 py-16 text-center">
+  <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-surface-hover">
+    <svg class="h-8 w-8 text-content-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+    </svg>
+  </div>
+  <p class="text-sm font-medium text-content">{{ title }}</p>
+  {% if description %}<p class="mt-1 max-w-sm text-sm text-content-muted">{{ description }}</p>{% endif %}
+  {% if action %}<div class="mt-4">{{ action | safe }}</div>{% endif %}
+</div>
+{% endmacro %}

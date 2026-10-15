@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="space-y-6">
+  <h1 class="text-2xl font-bold tracking-tight text-slate-900">关于 Ada Framework</h1>
+
+  {% import "components/card.html" as card %}
+  {% call card.render("技术栈", "服务端渲染 + 渐进增强") %}
+    <ul class="list-disc space-y-1 pl-5 text-sm text-slate-600">
+      <li><strong>Rust + Axum</strong>：高性能异步 HTTP 服务</li>
+      <li><strong>Minijinja</strong>：运行时模板引擎，支持继承与宏</li>
+      <li><strong>Tailwind CSS</strong>：原子化样式，开发期 CDN、生产期本地构建</li>
+      <li><strong>Alpine.js</strong>：声明式交互，无需前端构建工具链</li>
+    </ul>
+  {% endcall %}
+
+  {% call card.render("设计理念", "SSR 优先 · 组件化 · 渐进增强") %}
+    <p class="text-sm text-slate-600">
+      页面由可复用的组件模板组合而成，首屏完整渲染保证 SEO 与加载速度，
+      客户端交互按需增强，前后端职责清晰。
+    </p>
+  {% endcall %}
+</div>
+{% endblock %}

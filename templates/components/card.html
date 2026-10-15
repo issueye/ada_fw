@@ -1,0 +1,12 @@
+{# 通用卡片组件 #}
+{% macro render(title, subtitle="") %}
+<section class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+  <header class="mb-4">
+    <h2 class="text-lg font-semibold text-slate-900">{{ title }}</h2>
+    {% if subtitle %}
+    <p class="mt-1 text-sm text-slate-500">{{ subtitle }}</p>
+    {% endif %}
+  </header>
+  <div>{{ caller() }}</div>
+</section>
+{% endmacro %}

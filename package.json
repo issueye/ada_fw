@@ -1,0 +1,13 @@
+{
+  "name": "ada-fw",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Tailwind CSS 构建工具链（仅用于生产期样式编译）",
+  "scripts": {
+    "css:build": "tailwindcss -i ./static/css/input.css -o ./static/css/app.css --minify",
+    "css:watch": "tailwindcss -i ./static/css/input.css -o ./static/css/app.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.0"
+  }
+}

@@ -1,0 +1,103 @@
+{% extends "layouts/admin.html" %}
+
+{% import "components/data.html" as data %}
+{% import "components/display.html" as display %}
+{% import "components/button.html" as button %}
+{% import "components/input.html" as input %}
+{% import "components/form-controls.html" as fc %}
+
+{% block content %}
+<div class="space-y-6">
+  <div>
+    <h1 class="text-2xl font-semibold tracking-tight text-content">表单示例</h1>
+    <p class="mt-1 text-sm text-content-secondary">展示表单组件的各种用法与校验状态。</p>
+  </div>
+
+  <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+    {# 基础表单 #}
+    {% call data.render(title="基础表单", subtitle="包含各类输入控件") %}
+    {% call data.group() %}
+      {{ input.render(name="username", label="用户名", placeholder="请输入用户名", required=true, hint="4-20 个字符，支持字母数字下划线") }}
+      {{ input.render(name="email", label="邮箱", type="email", placeholder="name@example.com", required=true) }}
+      {{ input.render(name="password", label="密码", type="password", placeholder="请输入密码", required=true, hint="至少 8 位，包含大小写字母与数字") }}
+      {{ input.textarea(name="bio", label="个人简介", placeholder="简单介绍一下自己…", rows=3, hint="最多 200 字") }}
+      {{ input.select(
+        name="department",
+        label="所属部门",
+        options=[
+          {"value": "", "label": "请选择部门"},
+          {"value": "tech", "label": "技术部"},
+          {"value": "product", "label": "产品部"},
+          {"value": "design", "label": "设计部"},
+          {"value": "ops", "label": "运营部"}
+        ]
+      ) }}
+    {% endcall %}
+    {% call data.actions() %}
+      {{ button.render(label="取消", variant="outline") }}
+      {{ button.render(label="提交", variant="primary", type="submit") }}
+    {% endcall %}
+    {% endcall %}
+
+    {# 校验状态 #}
+    {% call data.render(title="校验状态", subtitle="错误态与禁用态") %}
+    {% call data.group() %}
+      {{ input.render(name="err1", label="邮箱（错误态）", value="invalid-email", error="邮箱格式不正确，请检查后重试") }}
+      {{ input.render(name="err2", label="用户名（错误态）", value="ab", error="用户名至少需要 4 个字符") }}
+      {{ input.render(name="dis1", label="禁用输入框", value="不可编辑的内容", disabled=true) }}
+      {{ input.render(name="ok1", label="正常状态", value="zhangwei@example.com", hint="该邮箱可用") }}
+    {% endcall %}
+    {% endcall %}
+  </div>
+
+  {# 选择控件 #}
+  {% call data.render(title="选择控件", subtitle="复选框、单选框、开关") %}
+  <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
+    <div class="space-y-4">
+      <p class="text-sm font-medium text-content">复选框</p>
+      {{ fc.checkbox(name="cb1", label="接收邮件通知", checked=true) }}
+      {{ fc.checkbox(name="cb2", label="接收短信通知", hint="仅在重要事件时发送") }}
+      {{ fc.checkbox(name="cb3", label="已禁用选项", disabled=true) }}
+    </div>
+
+    <div class="space-y-4">
+      <p class="text-sm font-medium text-content">单选框</p>
+      {{ fc.radio(
+        name="priority",
+        options=[
+          {"value": "low", "label": "低优先级"},
+          {"value": "medium", "label": "中优先级", "checked": true},
+          {"value": "high", "label": "高优先级"},
+          {"value": "urgent", "label": "紧急（禁用）", "disabled": true}
+        ]
+      ) }}
+    </div>
+
+    <div class="space-y-4">
+      <p class="text-sm font-medium text-content">开关</p>
+      {{ fc.switch(name="sw1", label="启用双因素认证", checked=true, hint="提升账号安全性") }}
+      {{ fc.switch(name="sw2", label="公开个人资料", hint="其他用户可查看") }}
+      {{ fc.switch(name="sw3", label="已禁用开关", disabled=true) }}
+    </div>
+  </div>
+  {% endcall %}
+
+  {# 提示条 #}
+  {% call data.render(title="提示条", subtitle="四种语义变体") %}
+  <div class="space-y-3">
+    {% call display.alert(title="信息提示", variant="info") %}
+      系统将于今晚 23:00 进行例行维护，预计持续 30 分钟。
+    {% endcall %}
+    {% call display.alert(title="操作成功", variant="success") %}
+      用户数据已成功保存，变更将在 1 分钟内生效。
+    {% endcall %}
+    {% call display.alert(title="注意", variant="warning") %}
+      当前存储空间已使用 85%，建议及时清理历史数据。
+    {% endcall %}
+    {% call display.alert(title="操作失败", variant="danger", dismissible=true) %}
+      无法连接到数据库，请检查网络配置后重试。
+    {% endcall %}
+  </div>
+  {% endcall %}
+</div>
+{% endblock %}

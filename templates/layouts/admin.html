@@ -1,0 +1,150 @@
+{# ==========================================================================
+   后台管理布局（模板继承版）
+   用法：
+     {% extends "layouts/admin.html" %}
+     {% block content %} ... {% endblock %}
+   上下文变量：title / breadcrumb / menu_items / active
+   ========================================================================== #}
+{% import "components/navigation.html" as nav %}
+{% import "components/feedback.html" as feedback %}
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light" x-data="adminLayout()" x-init="init()">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}{{ title }}{% endblock %} · Ada Admin</title>
+
+  {# 主题初始化：在渲染前应用，避免闪烁 #}
+  <script>
+    (function () {
+      var saved = localStorage.getItem('ada-theme');
+      var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.setAttribute('data-theme', saved || (prefersDark ? 'dark' : 'light'));
+    })();
+  </script>
+
+  {% if tailwind_mode == "cdn" %}
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: ['selector', '[data-theme="dark"]'],
+      theme: { extend: {
+        colors: {
+          primary: { subtle: 'var(--color-primary-subtle)', muted: 'var(--color-primary-muted)', DEFAULT: 'var(--color-primary)', hover: 'var(--color-primary-hover)', active: 'var(--color-primary-active)', fg: 'var(--color-primary-fg)' },
+          success: { subtle: 'var(--color-success-subtle)', muted: 'var(--color-success-muted)', DEFAULT: 'var(--color-success)', fg: 'var(--color-success-fg)' },
+          warning: { subtle: 'var(--color-warning-subtle)', muted: 'var(--color-warning-muted)', DEFAULT: 'var(--color-warning)', fg: 'var(--color-warning-fg)' },
+          danger: { subtle: 'var(--color-danger-subtle)', muted: 'var(--color-danger-muted)', DEFAULT: 'var(--color-danger)', hover: 'var(--color-danger-hover)', fg: 'var(--color-danger-fg)' },
+          info: { subtle: 'var(--color-info-subtle)', muted: 'var(--color-info-muted)', DEFAULT: 'var(--color-info)', fg: 'var(--color-info-fg)' },
+          bg: 'var(--color-bg)',
+          surface: { DEFAULT: 'var(--color-surface)', hover: 'var(--color-surface-hover)', active: 'var(--color-surface-active)' },
+          border: { DEFAULT: 'var(--color-border)', strong: 'var(--color-border-strong)' },
+          content: { DEFAULT: 'var(--color-text)', secondary: 'var(--color-text-secondary)', muted: 'var(--color-text-muted)', inverse: 'var(--color-text-inverse)' }
+        },
+        borderRadius: { sm: 'var(--radius-sm)', md: 'var(--radius-md)', lg: 'var(--radius-lg)', xl: 'var(--radius-xl)' },
+        boxShadow: { xs: 'var(--shadow-xs)', sm: 'var(--shadow-sm)', md: 'var(--shadow-md)', lg: 'var(--shadow-lg)', xl: 'var(--shadow-xl)' }
+      }}
+    };
+  </script>
+  {% else %}
+  <link rel="stylesheet" href="{{ asset('css/app.css') | safe }}">
+  {% endif %}
+
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script defer src="{{ asset('js/app.js') | safe }}"></script>
+</head>
+<body class="min-h-screen bg-bg text-content">
+  <div class="flex min-h-screen">
+    {# ==================== 侧边栏 ==================== #}
+    <aside class="fixed inset-y-0 left-0 z-40 flex flex-col border-r border-border bg-surface transition-[width] duration-base"
+           :class="sidebarCollapsed ? 'w-sidebar-collapsed' : 'w-sidebar'">
+      <div class="flex h-topbar shrink-0 items-center gap-3 border-b border-border px-4">
+        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-fg">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+          </svg>
+        </div>
+        <span x-show="!sidebarCollapsed" x-transition.opacity class="truncate text-base font-semibold text-content">Ada Admin</span>
+      </div>
+
+      <div class="flex-1 overflow-y-auto py-4 scrollbar-none">
+        {{ nav.menu(items=menu_items, collapsed="sidebarCollapsed") }}
+      </div>
+
+      <div class="shrink-0 border-t border-border p-3">
+        <button type="button" @click="toggleSidebar()"
+                class="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm text-content-secondary transition-colors duration-base hover:bg-surface-hover hover:text-content"
+                :aria-label="sidebarCollapsed ? '展开侧边栏' : '折叠侧边栏'">
+          <svg class="h-5 w-5 shrink-0 transition-transform duration-base" :class="sidebarCollapsed && 'rotate-180'"
+               viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clip-rule="evenodd"/>
+          </svg>
+          <span x-show="!sidebarCollapsed" x-transition.opacity>折叠</span>
+        </button>
+      </div>
+    </aside>
+
+    {# ==================== 主区域 ==================== #}
+    <div class="flex min-w-0 flex-1 flex-col transition-[margin] duration-base"
+         :class="sidebarCollapsed ? 'ml-sidebar-collapsed' : 'ml-sidebar'">
+
+      {# 顶栏 #}
+      <header class="sticky top-0 z-30 flex h-topbar shrink-0 items-center justify-between gap-4 border-b border-border bg-surface/80 px-6 backdrop-blur">
+        <div class="min-w-0 flex-1">
+          {{ nav.breadcrumb(items=breadcrumb) }}
+        </div>
+
+        <div class="flex shrink-0 items-center gap-2">
+          {# 主题切换 #}
+          <button type="button" @click="toggleTheme()"
+                  class="inline-flex h-9 w-9 items-center justify-center rounded-md text-content-secondary transition-colors duration-base hover:bg-surface-hover hover:text-content focus-ring"
+                  :aria-label="theme === 'dark' ? '切换到浅色模式' : '切换到暗色模式'">
+            <svg x-show="theme === 'light'" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path d="M10 2a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0110 2zM10 15a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0110 15zM10 7a3 3 0 100 6 3 3 0 000-6zM15.657 5.404a.75.75 0 10-1.06-1.06l-1.061 1.06a.75.75 0 001.06 1.06l1.06-1.06zM6.464 14.596a.75.75 0 10-1.06-1.06l-1.06 1.06a.75.75 0 001.06 1.06l1.06-1.06zM18 10a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0118 10zM5 10a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 015 10zM14.596 15.657a.75.75 0 001.06-1.06l-1.06-1.061a.75.75 0 10-1.06 1.06l1.06 1.06zM5.404 6.464a.75.75 0 001.06-1.06l-1.06-1.06a.75.75 0 10-1.061 1.06l1.06 1.06z"/>
+            </svg>
+            <svg x-show="theme === 'dark'" x-cloak class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path fill-rule="evenodd" d="M7.455 2.004a.75.75 0 01.26.77 7 7 0 009.958 7.967.75.75 0 011.067.853A8.5 8.5 0 116.647 1.921a.75.75 0 01.808.083z" clip-rule="evenodd"/>
+            </svg>
+          </button>
+
+          {# 通知 #}
+          <button type="button"
+                  class="relative inline-flex h-9 w-9 items-center justify-center rounded-md text-content-secondary transition-colors duration-base hover:bg-surface-hover hover:text-content focus-ring"
+                  aria-label="通知">
+            <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path fill-rule="evenodd" d="M10 2a6 6 0 00-6 6c0 1.887-.454 3.665-1.257 5.234a.75.75 0 00.515 1.076 32.91 32.91 0 003.256.508 3.5 3.5 0 006.972 0 32.903 32.903 0 003.256-.508.75.75 0 00.515-1.076A11.448 11.448 0 0116 8a6 6 0 00-6-6zM8.05 14.943a33.54 33.54 0 003.9 0 2 2 0 01-3.9 0z" clip-rule="evenodd"/>
+            </svg>
+            <span class="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-danger"></span>
+          </button>
+
+          {# 用户菜单 #}
+          {{ nav.dropdown(
+            trigger='<button type="button" class="flex items-center gap-2 rounded-md p-1 pr-2 transition-colors duration-base hover:bg-surface-hover focus-ring">
+              <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-primary-subtle text-xs font-medium text-primary">管</span>
+              <span class="hidden text-sm font-medium text-content sm:block">管理员</span>
+              <svg class="h-4 w-4 text-content-muted" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+            </button>',
+            items=[
+              {"label": "个人资料", "href": "/admin/settings"},
+              {"label": "账号设置", "href": "/admin/settings"},
+              {"divider": true},
+              {"label": "退出登录", "href": "/admin/login", "danger": true}
+            ]
+          ) }}
+        </div>
+      </header>
+
+      {# 内容区 #}
+      <main class="flex-1 px-6 py-6">
+        <div class="mx-auto w-full max-w-7xl">
+          {% block content %}{% endblock %}
+        </div>
+      </main>
+    </div>
+  </div>
+
+  {# 全局浮层 #}
+  {{ feedback.toast_container() }}
+  {{ feedback.confirm_dialog() }}
+</body>
+</html>

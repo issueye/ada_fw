@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light" x-data="adminLayout()" x-init="init()">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ title }} · Ada Admin</title>
+
+  <script>
+    (function () {
+      var saved = localStorage.getItem('ada-theme');
+      var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.setAttribute('data-theme', saved || (prefersDark ? 'dark' : 'light'));
+    })();
+  </script>
+
+  {% if tailwind_mode == "cdn" %}
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: ['selector', '[data-theme="dark"]'],
+      theme: { extend: {
+        colors: {
+          primary: { subtle: 'var(--color-primary-subtle)', muted: 'var(--color-primary-muted)', DEFAULT: 'var(--color-primary)', hover: 'var(--color-primary-hover)', active: 'var(--color-primary-active)', fg: 'var(--color-primary-fg)' },
+          success: { subtle: 'var(--color-success-subtle)', muted: 'var(--color-success-muted)', DEFAULT: 'var(--color-success)', fg: 'var(--color-success-fg)' },
+          warning: { subtle: 'var(--color-warning-subtle)', muted: 'var(--color-warning-muted)', DEFAULT: 'var(--color-warning)', fg: 'var(--color-warning-fg)' },
+          danger: { subtle: 'var(--color-danger-subtle)', muted: 'var(--color-danger-muted)', DEFAULT: 'var(--color-danger)', hover: 'var(--color-danger-hover)', fg: 'var(--color-danger-fg)' },
+          info: { subtle: 'var(--color-info-subtle)', muted: 'var(--color-info-muted)', DEFAULT: 'var(--color-info)', fg: 'var(--color-info-fg)' },
+          bg: 'var(--color-bg)',
+          surface: { DEFAULT: 'var(--color-surface)', hover: 'var(--color-surface-hover)', active: 'var(--color-surface-active)' },
+          border: { DEFAULT: 'var(--color-border)', strong: 'var(--color-border-strong)' },
+          content: { DEFAULT: 'var(--color-text)', secondary: 'var(--color-text-secondary)', muted: 'var(--color-text-muted)', inverse: 'var(--color-text-inverse)' }
+        },
+        borderRadius: { sm: 'var(--radius-sm)', md: 'var(--radius-md)', lg: 'var(--radius-lg)', xl: 'var(--radius-xl)' },
+        boxShadow: { xs: 'var(--shadow-xs)', sm: 'var(--shadow-sm)', md: 'var(--shadow-md)', lg: 'var(--shadow-lg)', xl: 'var(--shadow-xl)' }
+      }}
+    };
+  </script>
+  {% else %}
+  <link rel="stylesheet" href="{{ asset('css/app.css') | safe }}">
+  {% endif %}
+
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script defer src="{{ asset('js/app.js') | safe }}"></script>
+</head>
+<body class="min-h-screen bg-bg text-content">
+  <div class="flex min-h-screen items-center justify-center px-4 py-12">
+    <div class="w-full max-w-sm">
+      {# Logo #}
+      <div class="mb-8 flex flex-col items-center">
+        <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-fg shadow-md">
+          <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+          </svg>
+        </div>
+        <h1 class="text-xl font-semibold tracking-tight text-content">欢迎回来</h1>
+        <p class="mt-1 text-sm text-content-secondary">登录以继续访问 Ada Admin</p>
+      </div>
+
+      {# 登录表单 #}
+      <div class="card p-6">
+        <form class="space-y-5" @submit.prevent="$root.__toast({title: '登录成功', message: '正在跳转…', type: 'success'}); setTimeout(() => window.location.href = '/admin', 800)">
+          <div class="space-y-1.5">
+            <label for="login-email" class="block text-sm font-medium text-content">邮箱</label>
+            <input id="login-email" name="email" type="email" required
+                   placeholder="name@example.com"
+                   class="field-base h-10 text-sm">
+          </div>
+
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between">
+              <label for="login-password" class="block text-sm font-medium text-content">密码</label>
+              <a href="#" class="text-xs text-primary transition-colors duration-fast hover:text-primary-hover">忘记密码？</a>
+            </div>
+            <input id="login-password" name="password" type="password" required
+                   placeholder="请输入密码"
+                   class="field-base h-10 text-sm">
+          </div>
+
+          <label class="flex items-center gap-2">
+            <input type="checkbox" name="remember"
+                   class="h-4 w-4 rounded-sm border-border-strong text-primary focus:ring-2 focus:ring-primary/30">
+            <span class="text-sm text-content-secondary">记住我</span>
+          </label>
+
+          <button type="submit"
+                  class="inline-flex h-10 w-full items-center justify-center rounded-md bg-primary text-sm font-medium text-primary-fg shadow-xs transition-colors duration-base hover:bg-primary-hover focus-ring">
+            登录
+          </button>
+        </form>
+
+        <div class="mt-6 border-t border-border pt-5 text-center">
+          <p class="text-sm text-content-secondary">
+            还没有账号？
+            <a href="#" class="font-medium text-primary transition-colors duration-fast hover:text-primary-hover">立即注册</a>
+          </p>
+        </div>
+      </div>
+
+      {# 演示提示 #}
+      <div class="mt-6 rounded-lg border border-info-muted bg-info-subtle p-3">
+        <p class="text-center text-xs text-info">
+          演示环境：任意邮箱与密码均可登录
+        </p>
+      </div>
+
+      <p class="mt-8 text-center text-xs text-content-muted">
+        Powered by Rust · Minijinja · Tailwind CSS · Alpine.js
+      </p>
+    </div>
+  </div>
+</body>
+</html>

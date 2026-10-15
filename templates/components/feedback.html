@@ -1,0 +1,201 @@
+{# ==========================================================================
+   Modal · 弹窗
+   用法：
+     {% call modal.render(id="myModal", title="标题") %}
+       <p>内容</p>
+     {% endcall %}
+   控制：Alpine 变量 openModal === 'myModal'
+   ========================================================================== #}
+{% macro render(id, title="", size="md", closable=true) %}
+{%- set sizes = { "sm": "max-w-sm", "md": "max-w-lg", "lg": "max-w-2xl", "xl": "max-w-4xl" } -%}
+<div x-show="openModal === '{{ id }}'" x-cloak
+     class="fixed inset-0 z-50 flex items-center justify-center p-4"
+     role="dialog" aria-modal="true" aria-labelledby="modal-title-{{ id }}"
+     @keydown.escape.window="{% if closable %}openModal = null{% endif %}">
+  {# 遮罩 #}
+  <div class="absolute inset-0 bg-black/50 animate-fade-in"
+       {% if closable %}@click="openModal = null"{% endif %}></div>
+
+  {# 内容 #}
+  <div class="relative w-full {{ sizes[size] | default(sizes['md']) }} animate-scale-in rounded-xl border border-border bg-surface shadow-xl">
+    {% if title %}
+    <header class="flex items-center justify-between border-b border-border px-6 py-4">
+      <h2 id="modal-title-{{ id }}" class="text-base font-semibold text-content">{{ title }}</h2>
+      {% if closable %}
+      <button type="button" @click="openModal = null"
+              class="rounded-md p-1 text-content-muted transition-colors duration-fast hover:bg-surface-hover hover:text-content"
+              aria-label="关闭">
+        <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"/>
+        </svg>
+      </button>
+      {% endif %}
+    </header>
+    {% endif %}
+
+    <div class="px-6 py-5">{{ caller() }}</div>
+  </div>
+</div>
+{% endmacro %}
+
+
+{# 带底部操作区的弹窗 #}
+{% macro with_footer(id, title="", size="md", footer="") %}
+{%- set sizes = { "sm": "max-w-sm", "md": "max-w-lg", "lg": "max-w-2xl", "xl": "max-w-4xl" } -%}
+<div x-show="openModal === '{{ id }}'" x-cloak
+     class="fixed inset-0 z-50 flex items-center justify-center p-4"
+     role="dialog" aria-modal="true" @keydown.escape.window="openModal = null">
+  <div class="absolute inset-0 bg-black/50 animate-fade-in" @click="openModal = null"></div>
+  <div class="relative flex w-full {{ sizes[size] | default(sizes['md']) }} max-h-[85vh] flex-col animate-scale-in rounded-xl border border-border bg-surface shadow-xl">
+    <header class="flex items-center justify-between border-b border-border px-6 py-4">
+      <h2 class="text-base font-semibold text-content">{{ title }}</h2>
+      <button type="button" @click="openModal = null"
+              class="rounded-md p-1 text-content-muted transition-colors duration-fast hover:bg-surface-hover hover:text-content"
+              aria-label="关闭">
+        <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"/>
+        </svg>
+      </button>
+    </header>
+    <div class="flex-1 overflow-y-auto px-6 py-5">{{ caller() }}</div>
+    {% if footer %}
+    <footer class="flex items-center justify-end gap-2 border-t border-border px-6 py-4">{{ footer | safe }}</footer>
+    {% endif %}
+  </div>
+</div>
+{% endmacro %}
+
+
+{# ==========================================================================
+   Drawer · 抽屉
+   参数：side - right | left | top | bottom
+   ========================================================================== #}
+{% macro drawer(id, title="", side="right", size="md") %}
+{%- set widths = { "sm": "max-w-sm", "md": "max-w-md", "lg": "max-w-xl" } -%}
+{%- set anim = {
+  "right": "animate-slide-in-right",
+  "left": "animate-slide-in-left",
+  "top": "animate-slide-in-down",
+  "bottom": "animate-slide-in-up"
+} -%}
+{%- set pos = {
+  "right": "right-0 top-0 h-full",
+  "left": "left-0 top-0 h-full",
+  "top": "left-0 top-0 w-full",
+  "bottom": "bottom-0 left-0 w-full"
+} -%}
+<div x-show="openDrawer === '{{ id }}'" x-cloak
+     class="fixed inset-0 z-50" role="dialog" aria-modal="true"
+     @keydown.escape.window="openDrawer = null">
+  <div class="absolute inset-0 bg-black/50 animate-fade-in" @click="openDrawer = null"></div>
+  <div class="absolute {{ pos[side] | default(pos['right']) }} {{ widths[size] | default(widths['md']) if side in ['left', 'right'] else '' }} flex flex-col border-border bg-surface shadow-xl {{ anim[side] | default(anim['right']) }}">
+    <header class="flex items-center justify-between border-b border-border px-6 py-4">
+      <h2 class="text-base font-semibold text-content">{{ title }}</h2>
+      <button type="button" @click="openDrawer = null"
+              class="rounded-md p-1 text-content-muted transition-colors duration-fast hover:bg-surface-hover hover:text-content"
+              aria-label="关闭">
+        <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"/>
+        </svg>
+      </button>
+    </header>
+    <div class="flex-1 overflow-y-auto px-6 py-5">{{ caller() }}</div>
+  </div>
+</div>
+{% endmacro %}
+
+
+{# ==========================================================================
+   Toast · 轻提示容器
+   在页面中放置一次，由 Alpine 的 toast() 方法驱动。
+   ========================================================================== #}
+{% macro toast_container() %}
+<div class="pointer-events-none fixed right-4 top-4 z-[60] flex w-full max-w-sm flex-col gap-2"
+     role="region" aria-live="polite" aria-label="通知">
+  <template x-for="t in toasts" :key="t.id">
+    <div class="pointer-events-auto flex items-start gap-3 rounded-lg border p-4 shadow-lg animate-toast-in"
+         :class="{
+           'border-info-muted bg-info-subtle': t.type === 'info',
+           'border-success-muted bg-success-subtle': t.type === 'success',
+           'border-warning-muted bg-warning-subtle': t.type === 'warning',
+           'border-danger-muted bg-danger-subtle': t.type === 'danger'
+         }">
+      <svg class="h-5 w-5 shrink-0" :class="{
+             'text-info': t.type === 'info',
+             'text-success': t.type === 'success',
+             'text-warning': t.type === 'warning',
+             'text-danger': t.type === 'danger'
+           }" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd"/>
+      </svg>
+      <div class="flex-1">
+        <p class="text-sm font-medium text-content" x-text="t.title"></p>
+        <p class="mt-0.5 text-sm text-content-secondary" x-show="t.message" x-text="t.message"></p>
+      </div>
+      <button type="button" @click="dismissToast(t.id)"
+              class="shrink-0 text-content-muted transition-colors duration-fast hover:text-content" aria-label="关闭">
+        <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"/>
+        </svg>
+      </button>
+    </div>
+  </template>
+</div>
+{% endmacro %}
+
+
+{# ==========================================================================
+   Tooltip · 文字提示
+   参数：text - 提示内容；placement - top | bottom | left | right
+   ========================================================================== #}
+{% macro tooltip(text, placement="top") %}
+{%- set pos = {
+  "top": "bottom-full left-1/2 -translate-x-1/2 mb-2",
+  "bottom": "top-full left-1/2 -translate-x-1/2 mt-2",
+  "left": "right-full top-1/2 -translate-y-1/2 mr-2",
+  "right": "left-full top-1/2 -translate-y-1/2 ml-2"
+} -%}
+<span class="group relative inline-flex">
+  {{ caller() }}
+  <span role="tooltip"
+        class="pointer-events-none absolute z-40 whitespace-nowrap rounded-md bg-content px-2 py-1 text-xs text-content-inverse opacity-0 shadow-md transition-opacity duration-fast group-hover:opacity-100 {{ pos[placement] | default(pos['top']) }}">
+    {{ text }}
+  </span>
+</span>
+{% endmacro %}
+
+
+{# ==========================================================================
+   Confirm · 二次确认弹窗（危险操作专用）
+   控制：Alpine 变量 confirmState = { open, title, message, onConfirm }
+   ========================================================================== #}
+{% macro confirm_dialog() %}
+<div x-show="confirmState.open" x-cloak
+     class="fixed inset-0 z-[70] flex items-center justify-center p-4"
+     role="alertdialog" aria-modal="true" @keydown.escape.window="confirmState.open = false">
+  <div class="absolute inset-0 bg-black/50 animate-fade-in" @click="confirmState.open = false"></div>
+  <div class="relative w-full max-w-sm animate-scale-in rounded-xl border border-border bg-surface p-6 shadow-xl">
+    <div class="flex gap-4">
+      <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-danger-subtle">
+        <svg class="h-5 w-5 text-danger" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/>
+        </svg>
+      </div>
+      <div class="flex-1">
+        <h3 class="text-base font-semibold text-content" x-text="confirmState.title"></h3>
+        <p class="mt-1 text-sm text-content-secondary" x-text="confirmState.message"></p>
+      </div>
+    </div>
+    <div class="mt-6 flex justify-end gap-2">
+      <button type="button" @click="confirmState.open = false"
+              class="inline-flex h-9 items-center rounded-md border border-border-strong bg-surface px-4 text-sm font-medium text-content transition-colors duration-base hover:bg-surface-hover focus-ring">
+        取消
+      </button>
+      <button type="button" @click="confirmState.onConfirm && confirmState.onConfirm(); confirmState.open = false"
+              class="inline-flex h-9 items-center rounded-md bg-danger px-4 text-sm font-medium text-danger-fg shadow-xs transition-colors duration-base hover:bg-danger-hover focus-ring">
+        确认
+      </button>
+    </div>
+  </div>
+</div>
+{% endmacro %}

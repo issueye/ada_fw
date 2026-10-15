@@ -1,0 +1,40 @@
+{# 待办列表组件：SSR 渲染初始数据，Alpine 接管后续交互 #}
+{% macro render(todos) %}
+<div x-data="todoApp()" x-init="init()" class="space-y-4">
+  {# 新增表单 #}
+  <form @submit.prevent="add()" class="flex gap-2">
+    <input type="text" x-model="draft" placeholder="添加一条待办…"
+           class="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm
+                  focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100">
+    <button type="submit"
+            class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white
+                   transition hover:bg-indigo-700 disabled:opacity-50"
+            :disabled="!draft.trim()">
+      添加
+    </button>
+  </form>
+
+  {# 错误提示 #}
+  <p x-show="error" x-text="error" x-cloak class="text-sm text-red-600"></p>
+
+  {# 列表：SSR 首屏 + Alpine 接管 #}
+  <ul class="divide-y divide-slate-100 rounded-lg border border-slate-200 bg-white">
+    <template x-for="todo in todos" :key="todo.id">
+      <li class="flex items-center gap-3 px-4 py-3">
+        <input type="checkbox" :checked="todo.done" @change="toggle(todo)"
+               class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
+        <span class="flex-1 text-sm" :class="todo.done && 'line-through text-slate-400'"
+              x-text="todo.title"></span>
+        <button @click="remove(todo)"
+                class="text-sm text-slate-400 transition hover:text-red-600">删除</button>
+      </li>
+    </template>
+    <li x-show="todos.length === 0" x-cloak class="px-4 py-6 text-center text-sm text-slate-400">
+      暂无待办，添加一条试试吧
+    </li>
+  </ul>
+
+  {# 初始数据注入：SSR 数据交给 Alpine 接管 #}
+  <script type="application/json" id="initial-todos">{{ initial_todos_json | safe }}</script>
+</div>
+{% endmacro %}
