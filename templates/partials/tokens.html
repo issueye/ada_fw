@@ -1,0 +1,232 @@
+{# ==========================================================================
+   设计令牌片段
+   - CDN 模式：内联为 <style>，因为 tokens.css 不会被单独加载
+   - 本地模式：由 app.css（@import tokens.css）提供，无需内联
+   用法：{% include "partials/tokens.html" %}
+   ========================================================================== #}
+{% if tailwind_mode == "cdn" %}
+<style>
+:root {
+  --color-primary-subtle: #eef2ff;
+  --color-primary-muted: #c7d2fe;
+  --color-primary: #4f46e5;
+  --color-primary-hover: #4338ca;
+  --color-primary-active: #3730a3;
+  --color-primary-fg: #ffffff;
+
+  --color-bg: #f8fafc;
+  --color-surface: #ffffff;
+  --color-surface-hover: #f1f5f9;
+  --color-surface-active: #e2e8f0;
+  --color-border: #e2e8f0;
+  --color-border-strong: #cbd5e1;
+  --color-text: #0f172a;
+  --color-text-secondary: #475569;
+  --color-text-muted: #94a3b8;
+  --color-text-inverse: #ffffff;
+
+  --color-success-subtle: #f0fdf4;
+  --color-success-muted: #bbf7d0;
+  --color-success: #16a34a;
+  --color-success-fg: #ffffff;
+
+  --color-warning-subtle: #fffbeb;
+  --color-warning-muted: #fde68a;
+  --color-warning: #d97706;
+  --color-warning-fg: #ffffff;
+
+  --color-danger-subtle: #fef2f2;
+  --color-danger-muted: #fecaca;
+  --color-danger: #dc2626;
+  --color-danger-hover: #b91c1c;
+  --color-danger-fg: #ffffff;
+
+  --color-info-subtle: #f0f9ff;
+  --color-info-muted: #bae6fd;
+  --color-info: #0284c7;
+  --color-info-fg: #ffffff;
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+
+  --shadow-xs: 0 1px 2px 0 rgb(15 23 42 / 0.04);
+  --shadow-sm: 0 1px 3px 0 rgb(15 23 42 / 0.08), 0 1px 2px -1px rgb(15 23 42 / 0.06);
+  --shadow-md: 0 4px 6px -1px rgb(15 23 42 / 0.08), 0 2px 4px -2px rgb(15 23 42 / 0.06);
+  --shadow-lg: 0 10px 15px -3px rgb(15 23 42 / 0.10), 0 4px 6px -4px rgb(15 23 42 / 0.06);
+  --shadow-xl: 0 20px 25px -5px rgb(15 23 42 / 0.12), 0 8px 10px -6px rgb(15 23 42 / 0.06);
+
+  --duration-fast: 100ms;
+  --duration-base: 150ms;
+  --duration-slow: 250ms;
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+  --sidebar-width: 240px;
+  --sidebar-width-collapsed: 64px;
+  --topbar-height: 56px;
+}
+
+[data-theme="dark"] {
+  --color-primary-subtle: #312e81;
+  --color-primary-muted: #4338ca;
+  --color-primary: #6366f1;
+  --color-primary-hover: #818cf8;
+  --color-primary-active: #a5b4fc;
+  --color-primary-fg: #ffffff;
+
+  --color-bg: #0f172a;
+  --color-surface: #1e293b;
+  --color-surface-hover: #334155;
+  --color-surface-active: #475569;
+  --color-border: #334155;
+  --color-border-strong: #475569;
+  --color-text: #f1f5f9;
+  --color-text-secondary: #cbd5e1;
+  --color-text-muted: #64748b;
+  --color-text-inverse: #0f172a;
+
+  --color-success-subtle: #052e16;
+  --color-success-muted: #166534;
+  --color-success: #22c55e;
+  --color-success-fg: #052e16;
+
+  --color-warning-subtle: #451a03;
+  --color-warning-muted: #92400e;
+  --color-warning: #f59e0b;
+  --color-warning-fg: #451a03;
+
+  --color-danger-subtle: #450a0a;
+  --color-danger-muted: #991b1b;
+  --color-danger: #ef4444;
+  --color-danger-hover: #f87171;
+  --color-danger-fg: #450a0a;
+
+  --color-info-subtle: #082f49;
+  --color-info-muted: #075985;
+  --color-info: #38bdf8;
+  --color-info-fg: #082f49;
+
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.20);
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.30), 0 1px 2px -1px rgb(0 0 0 / 0.20);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.35), 0 2px 4px -2px rgb(0 0 0 / 0.25);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.40), 0 4px 6px -4px rgb(0 0 0 / 0.30);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.45), 0 8px 10px -6px rgb(0 0 0 / 0.35);
+}
+
+/* 基础样式 */
+* { border-color: var(--color-border); }
+html { color-scheme: light; }
+[data-theme="dark"] { color-scheme: dark; }
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: "Inter", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 20px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.tabular { font-variant-numeric: tabular-nums; }
+[x-cloak] { display: none !important; }
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-border-strong); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-text-muted); }
+
+:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* 组件层：CDN 模式下 @layer 不可用，直接输出为普通类 */
+.focus-ring:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-surface), 0 0 0 4px color-mix(in srgb, var(--color-primary) 30%, transparent);
+}
+.card {
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+.field-base {
+  width: 100%;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-strong);
+  background-color: var(--color-surface);
+  padding-left: 12px;
+  padding-right: 12px;
+  font-size: 14px;
+  color: var(--color-text);
+  transition: border-color var(--duration-base), box-shadow var(--duration-base);
+}
+.field-base::placeholder { color: var(--color-text-muted); }
+.field-base:focus {
+  border-color: var(--color-primary);
+  outline: none;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 20%, transparent);
+}
+.field-base:disabled { cursor: not-allowed; opacity: 0.5; }
+
+.table-base { width: 100%; border-collapse: collapse; font-size: 14px; }
+.table-base thead th {
+  border-bottom: 1px solid var(--color-border);
+  background-color: var(--color-surface-hover);
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  color: var(--color-text-secondary);
+}
+.table-base tbody td {
+  border-bottom: 1px solid var(--color-border);
+  padding: 12px 16px;
+  color: var(--color-text);
+}
+.table-base tbody tr { transition: background-color var(--duration-fast); }
+.table-base tbody tr:hover { background-color: var(--color-surface-hover); }
+
+.skeleton-shimmer { position: relative; overflow: hidden; }
+.skeleton-shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.15), transparent);
+  animation: shimmer 1.5s infinite;
+}
+@keyframes shimmer { 100% { transform: translateX(100%); } }
+
+.scrollbar-none { scrollbar-width: none; -ms-overflow-style: none; }
+.scrollbar-none::-webkit-scrollbar { display: none; }
+
+/* 动画 */
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes scale-in { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+@keyframes slide-in-right { from { transform: translateX(100%); } to { transform: translateX(0); } }
+@keyframes slide-in-left { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+@keyframes slide-in-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
+@keyframes slide-in-down { from { transform: translateY(-100%); } to { transform: translateY(0); } }
+@keyframes toast-in { from { opacity: 0; transform: translateY(-8px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+.animate-fade-in { animation: fade-in var(--duration-base) var(--ease-out); }
+.animate-scale-in { animation: scale-in var(--duration-base) var(--ease-out); }
+.animate-slide-in-right { animation: slide-in-right var(--duration-slow) var(--ease-out); }
+.animate-slide-in-left { animation: slide-in-left var(--duration-slow) var(--ease-out); }
+.animate-slide-in-up { animation: slide-in-up var(--duration-slow) var(--ease-out); }
+.animate-slide-in-down { animation: slide-in-down var(--duration-slow) var(--ease-out); }
+.animate-toast-in { animation: toast-in var(--duration-base) var(--ease-out); }
+</style>
+{% endif %}

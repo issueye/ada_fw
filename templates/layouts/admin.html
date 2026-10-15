@@ -24,31 +24,11 @@
     })();
   </script>
 
-  {% if tailwind_mode == "cdn" %}
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: ['selector', '[data-theme="dark"]'],
-      theme: { extend: {
-        colors: {
-          primary: { subtle: 'var(--color-primary-subtle)', muted: 'var(--color-primary-muted)', DEFAULT: 'var(--color-primary)', hover: 'var(--color-primary-hover)', active: 'var(--color-primary-active)', fg: 'var(--color-primary-fg)' },
-          success: { subtle: 'var(--color-success-subtle)', muted: 'var(--color-success-muted)', DEFAULT: 'var(--color-success)', fg: 'var(--color-success-fg)' },
-          warning: { subtle: 'var(--color-warning-subtle)', muted: 'var(--color-warning-muted)', DEFAULT: 'var(--color-warning)', fg: 'var(--color-warning-fg)' },
-          danger: { subtle: 'var(--color-danger-subtle)', muted: 'var(--color-danger-muted)', DEFAULT: 'var(--color-danger)', hover: 'var(--color-danger-hover)', fg: 'var(--color-danger-fg)' },
-          info: { subtle: 'var(--color-info-subtle)', muted: 'var(--color-info-muted)', DEFAULT: 'var(--color-info)', fg: 'var(--color-info-fg)' },
-          bg: 'var(--color-bg)',
-          surface: { DEFAULT: 'var(--color-surface)', hover: 'var(--color-surface-hover)', active: 'var(--color-surface-active)' },
-          border: { DEFAULT: 'var(--color-border)', strong: 'var(--color-border-strong)' },
-          content: { DEFAULT: 'var(--color-text)', secondary: 'var(--color-text-secondary)', muted: 'var(--color-text-muted)', inverse: 'var(--color-text-inverse)' }
-        },
-        borderRadius: { sm: 'var(--radius-sm)', md: 'var(--radius-md)', lg: 'var(--radius-lg)', xl: 'var(--radius-xl)' },
-        boxShadow: { xs: 'var(--shadow-xs)', sm: 'var(--shadow-sm)', md: 'var(--shadow-md)', lg: 'var(--shadow-lg)', xl: 'var(--shadow-xl)' }
-      }}
-    };
-  </script>
-  {% else %}
-  <link rel="stylesheet" href="{{ asset('css/app.css') | safe }}">
-  {% endif %}
+  {# 设计令牌：CDN 模式内联，本地模式由 app.css 提供 #}
+  {% include "partials/tokens.html" %}
+
+  {# Tailwind：CDN 配置或本地构建产物 #}
+  {% include "partials/tailwind-config.html" %}
 
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <script defer src="{{ asset('js/app.js') | safe }}"></script>
