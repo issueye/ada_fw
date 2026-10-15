@@ -30,8 +30,10 @@
   {# Tailwind：CDN 配置或本地构建产物 #}
   {% include "partials/tailwind-config.html" %}
 
-  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  {# Alpine 组件注册脚本必须在 Alpine 核心之前加载，
+     否则 alpine:init 事件会在注册前派发，导致组件未定义。 #}
   <script defer src="{{ asset('js/app.js') | safe }}"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body class="min-h-screen bg-bg text-content">
   <div class="flex min-h-screen">
