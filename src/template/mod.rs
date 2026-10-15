@@ -133,11 +133,24 @@ fn build_env(config: &AppConfig) -> AppResult<Environment<'static>> {
     // 注册全局变量：Tailwind 模式，供 base.html 条件渲染。
     env.add_global("tailwind_mode", config.tailwind_mode.as_str());
 
+    // 注册全局变量：设计令牌与组件层 CSS。
+    //
+    // 通过 `include_str!` 在编译期嵌入源文件，保证 CDN 模式内联的样式
+    // 与本地构建产物**同源**，避免手工副本脱节。
+    env.add_global("tokens_css", TOKENS_CSS);
+    env.add_global("components_css", COMPONENTS_CSS);
+
     // 开发模式下保留模板源信息，便于定位错误。
     env.set_debug(config.hot_reload);
 
     Ok(env)
 }
+
+/// 设计令牌 CSS（编译期嵌入 `static/css/tokens.css`）。
+pub const TOKENS_CSS: &str = include_str!("../../static/css/tokens.css");
+
+/// 组件层 CSS（编译期嵌入 `static/css/components.css`）。
+pub const COMPONENTS_CSS: &str = include_str!("../../static/css/components.css");
 
 /// 判断路径是否为模板文件。
 fn is_template(path: &Path) -> bool {

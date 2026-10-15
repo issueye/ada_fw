@@ -1,6 +1,9 @@
 {# ==========================================================================
    Tailwind CDN 配置片段
    仅在 CDN 模式下输出。将语义令牌映射为 Tailwind 工具类。
+
+   注意：本配置必须与 tailwind.config.js 保持一致，
+   新增令牌时两处都要更新。
    用法：{% include "partials/tailwind-config.html" %}
    ========================================================================== #}
 {% if tailwind_mode == "cdn" %}
@@ -18,6 +21,14 @@
           warning: { subtle: 'var(--color-warning-subtle)', muted: 'var(--color-warning-muted)', DEFAULT: 'var(--color-warning)', fg: 'var(--color-warning-fg)' },
           danger: { subtle: 'var(--color-danger-subtle)', muted: 'var(--color-danger-muted)', DEFAULT: 'var(--color-danger)', hover: 'var(--color-danger-hover)', fg: 'var(--color-danger-fg)' },
           info: { subtle: 'var(--color-info-subtle)', muted: 'var(--color-info-muted)', DEFAULT: 'var(--color-info)', fg: 'var(--color-info-fg)' },
+          topbar: { DEFAULT: 'var(--color-topbar-bg)', fg: 'var(--color-topbar-fg)', hover: 'var(--color-topbar-hover)', active: 'var(--color-topbar-active)' },
+          stat: {
+            'blue-bg': 'var(--color-stat-blue-bg)', 'blue-fg': 'var(--color-stat-blue-fg)',
+            'orange-bg': 'var(--color-stat-orange-bg)', 'orange-fg': 'var(--color-stat-orange-fg)',
+            'green-bg': 'var(--color-stat-green-bg)', 'green-fg': 'var(--color-stat-green-fg)',
+            'purple-bg': 'var(--color-stat-purple-bg)', 'purple-fg': 'var(--color-stat-purple-fg)',
+            'red-bg': 'var(--color-stat-red-bg)', 'red-fg': 'var(--color-stat-red-fg)'
+          },
           bg: 'var(--color-bg)',
           surface: { DEFAULT: 'var(--color-surface)', hover: 'var(--color-surface-hover)', active: 'var(--color-surface-active)' },
           border: { DEFAULT: 'var(--color-border)', strong: 'var(--color-border-strong)' },
@@ -27,9 +38,9 @@
         boxShadow: { xs: 'var(--shadow-xs)', sm: 'var(--shadow-sm)', md: 'var(--shadow-md)', lg: 'var(--shadow-lg)', xl: 'var(--shadow-xl)' },
         transitionDuration: { fast: 'var(--duration-fast)', base: 'var(--duration-base)', slow: 'var(--duration-slow)' },
         transitionTimingFunction: { out: 'var(--ease-out)', in: 'var(--ease-in)', 'in-out': 'var(--ease-in-out)' },
-        spacing: { sidebar: 'var(--sidebar-width)', 'sidebar-collapsed': 'var(--sidebar-width-collapsed)', topbar: 'var(--topbar-height)' },
+        spacing: { sidebar: 'var(--sidebar-width)', 'sidebar-collapsed': 'var(--sidebar-width-collapsed)', topbar: 'var(--topbar-height)', tabbar: 'var(--tabbar-height)' },
         fontFamily: {
-          sans: ['Inter', 'PingFang SC', 'Microsoft YaHei', 'system-ui', 'sans-serif'],
+          sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'],
           mono: ['JetBrains Mono', 'SFMono-Regular', 'Consolas', 'monospace']
         }
       }
