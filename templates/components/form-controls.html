@@ -17,7 +17,7 @@
          {% if disabled %}disabled{% endif %}
          class="mt-0.5 h-4 w-4 shrink-0 rounded-sm border-border-strong text-primary
                 transition-colors duration-fast
-                focus:ring-2 focus:ring-primary/30 focus:ring-offset-0
+                focus:ring-2 focus:ring-primary focus:ring-offset-0
                 disabled:cursor-not-allowed disabled:opacity-50"
          {{ attrs | safe }}>
   {% if label or hint %}
@@ -49,7 +49,7 @@
            {% if opt.disabled %}disabled{% endif %}
            class="h-4 w-4 shrink-0 border-border-strong text-primary
                   transition-colors duration-fast
-                  focus:ring-2 focus:ring-primary/30 focus:ring-offset-0
+                  focus:ring-2 focus:ring-primary focus:ring-offset-0
                   disabled:cursor-not-allowed disabled:opacity-50">
     <label for="field-{{ name }}-{{ opt.value }}"
            class="text-sm text-content {% if opt.disabled %}opacity-50{% endif %}">{{ opt.label }}</label>
@@ -91,7 +91,7 @@
            {{ attrs | safe }}>
     <span class="h-5 w-9 rounded-full bg-border-strong transition-colors duration-base
                  peer-checked:bg-primary
-                 peer-focus-visible:ring-2 peer-focus-visible:ring-primary/30 peer-focus-visible:ring-offset-1"></span>
+                 peer-focus-visible:ring-2 peer-focus-visible:ring-primary peer-focus-visible:ring-offset-1"></span>
     <span class="absolute left-0.5 h-4 w-4 rounded-full bg-white shadow-xs transition-transform duration-base
                  peer-checked:translate-x-4"></span>
   </label>

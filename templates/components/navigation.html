@@ -162,25 +162,23 @@
      collapsed - Alpine 表达式，控制折叠态
    ========================================================================== #}
 {% macro menu(items=[], collapsed="sidebarCollapsed") %}
-<nav class="space-y-1 px-3" aria-label="主导航">
+<nav class="space-y-0.5 py-2" aria-label="主导航">
   {% for item in items %}
     {% if item.children %}
     <div x-data="{ open: {{ 'true' if item.active else 'false' }} }">
       <button type="button" @click="open = !open"
-              class="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors duration-base
-                     {% if item.active %}bg-primary-subtle text-primary{% else %}text-content-secondary hover:bg-surface-hover hover:text-content{% endif %}">
-        <span class="h-5 w-5 shrink-0" aria-hidden="true">{{ item.icon | safe }}</span>
+              class="menu-item w-full {% if item.active %}menu-item-active{% endif %}">
+        <span class="h-4 w-4 shrink-0" aria-hidden="true">{{ item.icon | safe }}</span>
         <span x-show="!{{ collapsed }}" x-transition.opacity class="flex-1 text-left">{{ item.label }}</span>
-        <svg x-show="!{{ collapsed }}" class="h-4 w-4 shrink-0 transition-transform duration-base" :class="open && 'rotate-90'"
+        <svg x-show="!{{ collapsed }}" class="h-3.5 w-3.5 shrink-0 transition-transform duration-base" :class="open && 'rotate-90'"
              viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
           <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd"/>
         </svg>
       </button>
-      <div x-show="open && !{{ collapsed }}" x-collapse class="mt-1 space-y-1 pl-11">
+      <div x-show="open && !{{ collapsed }}" x-collapse class="space-y-0.5">
         {% for child in item.children %}
         <a href="{{ child.href | safe }}"
-           class="block rounded-md px-3 py-1.5 text-sm transition-colors duration-fast
-                  {% if child.active %}font-medium text-primary{% else %}text-content-secondary hover:bg-surface-hover hover:text-content{% endif %}">
+           class="menu-item pl-9 {% if child.active %}menu-item-active{% endif %}">
           {{ child.label }}
         </a>
         {% endfor %}
@@ -188,14 +186,40 @@
     </div>
     {% else %}
     <a href="{{ item.href | safe }}"
-       class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors duration-base
-              {% if item.active %}bg-primary-subtle text-primary{% else %}text-content-secondary hover:bg-surface-hover hover:text-content{% endif %}"
+       class="menu-item {% if item.active %}menu-item-active{% endif %}"
        {% if item.active %}aria-current="page"{% endif %}
        :title="{{ collapsed }} && '{{ item.label }}'">
-      <span class="h-5 w-5 shrink-0" aria-hidden="true">{{ item.icon | safe }}</span>
+      <span class="h-4 w-4 shrink-0" aria-hidden="true">{{ item.icon | safe }}</span>
       <span x-show="!{{ collapsed }}" x-transition.opacity>{{ item.label }}</span>
     </a>
     {% endif %}
   {% endfor %}
 </nav>
+{% endmacro %}
+
+
+{# ==========================================================================
+   Tabbar · 多页签栏
+   参数：
+     tabs - [{ label, href, active, closable }]
+   ========================================================================== #}
+{% macro tabbar(tabs=[]) %}
+<div class="flex h-tabbar shrink-0 items-stretch border-b border-border bg-surface-hover" role="tablist">
+  {% for tab in tabs %}
+  <a href="{{ tab.href | safe }}"
+     class="tab-item {% if tab.active %}tab-item-active{% endif %}"
+     role="tab"
+     {% if tab.active %}aria-selected="true"{% else %}aria-selected="false"{% endif %}>
+    <span>{{ tab.label }}</span>
+    {% if tab.closable %}
+    <span class="ml-1 inline-flex h-4 w-4 items-center justify-center rounded-sm text-content-muted transition-colors duration-fast hover:bg-surface-active hover:text-content"
+          aria-label="关闭标签">
+      <svg class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+        <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"/>
+      </svg>
+    </span>
+    {% endif %}
+  </a>
+  {% endfor %}
+</div>
 {% endmacro %}

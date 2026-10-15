@@ -44,7 +44,7 @@
            class="field-base {{ sizes[size] | default(sizes['md']) }}
                   {% if prefix %}pl-9{% endif %}
                   {% if suffix %}pr-9{% endif %}
-                  {% if has_error %}border-danger focus:border-danger focus:ring-danger/20{% endif %}"
+                  {% if has_error %}border-danger focus:border-danger focus:ring-danger{% endif %}"
            {{ attrs | safe }}>
 
     {% if suffix %}
@@ -89,7 +89,7 @@
             {% if disabled %}disabled{% endif %}
             {% if has_error %}aria-invalid="true" aria-describedby="error-{{ name }}"{% endif %}
             class="field-base py-2 resize-y
-                   {% if has_error %}border-danger focus:border-danger focus:ring-danger/20{% endif %}"
+                   {% if has_error %}border-danger focus:border-danger focus:ring-danger{% endif %}"
             {{ attrs | safe }}>{{ value }}</textarea>
 
   {% if has_error %}
@@ -124,7 +124,7 @@
             {% if disabled %}disabled{% endif %}
             {% if has_error %}aria-invalid="true"{% endif %}
             class="field-base appearance-none pr-9 {{ sizes[size] | default(sizes['md']) }}
-                   {% if has_error %}border-danger focus:border-danger focus:ring-danger/20{% endif %}"
+                   {% if has_error %}border-danger focus:border-danger focus:ring-danger{% endif %}"
             {{ attrs | safe }}>
       {% for opt in options %}
       <option value="{{ opt.value }}" {% if opt.selected %}selected{% endif %}>{{ opt.label }}</option>

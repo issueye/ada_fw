@@ -4,29 +4,18 @@
 {% import "components/display.html" as display %}
 
 {% block content %}
-<div class="space-y-6">
+<div class="space-y-4">
   {# 页面标题 #}
   <div>
-    <h1 class="text-2xl font-semibold tracking-tight text-content">仪表盘</h1>
-    <p class="mt-1 text-sm text-content-secondary">欢迎回来，这里是系统概览。</p>
+    <h1 class="text-lg font-semibold text-content">仪表盘</h1>
+    <p class="mt-0.5 text-sm text-content-secondary">欢迎回来，这里是系统概览。</p>
   </div>
 
-  {# 指标卡 #}
-  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-    {% for stat in stats %}
-    {{ data.stat_card(
-      label=stat.label,
-      value=stat.value,
-      trend=stat.trend,
-      trend_up=stat.trend_up,
-      icon=stat.icon,
-      variant=stat.variant
-    ) }}
-    {% endfor %}
-  </div>
+  {# 指标卡组（多色并排） #}
+  {{ data.stat_group(items=stats, cols=4) }}
 
   {# 双栏：最近用户 + 活动流 #}
-  <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+  <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
     {# 最近用户 #}
     <div class="lg:col-span-2">
       {% call data.render(title="最近用户", subtitle="最新注册的 5 位用户") %}
@@ -65,7 +54,7 @@
 
     {# 活动流 #}
     {% call data.render(title="最近活动", subtitle="系统操作记录") %}
-    <ul class="space-y-4">
+    <ul class="space-y-3">
       {% for act in activities %}
       <li class="flex gap-3">
         <span class="mt-1.5 h-2 w-2 shrink-0 rounded-full

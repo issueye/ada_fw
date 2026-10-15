@@ -44,6 +44,26 @@ module.exports = {
           DEFAULT: 'var(--color-info)',
           fg: 'var(--color-info-fg)',
         },
+        // ---- 顶栏（深蓝铺满） ----
+        topbar: {
+          DEFAULT: 'var(--color-topbar-bg)',
+          fg: 'var(--color-topbar-fg)',
+          hover: 'var(--color-topbar-hover)',
+          active: 'var(--color-topbar-active)',
+        },
+        // ---- 统计卡浅色底 ----
+        stat: {
+          'blue-bg': 'var(--color-stat-blue-bg)',
+          'blue-fg': 'var(--color-stat-blue-fg)',
+          'orange-bg': 'var(--color-stat-orange-bg)',
+          'orange-fg': 'var(--color-stat-orange-fg)',
+          'green-bg': 'var(--color-stat-green-bg)',
+          'green-fg': 'var(--color-stat-green-fg)',
+          'purple-bg': 'var(--color-stat-purple-bg)',
+          'purple-fg': 'var(--color-stat-purple-fg)',
+          'red-bg': 'var(--color-stat-red-bg)',
+          'red-fg': 'var(--color-stat-red-fg)',
+        },
         // ---- 中性色 ----
         bg: 'var(--color-bg)',
         surface: {
@@ -89,9 +109,21 @@ module.exports = {
         sidebar: 'var(--sidebar-width)',
         'sidebar-collapsed': 'var(--sidebar-width-collapsed)',
         topbar: 'var(--topbar-height)',
+        tabbar: 'var(--tabbar-height)',
       },
       fontFamily: {
-        sans: ['Inter', 'PingFang SC', 'Microsoft YaHei', 'system-ui', 'sans-serif'],
+        sans: [
+          '-apple-system',
+          'BlinkMacSystemFont',
+          'Segoe UI',
+          'PingFang SC',
+          'Hiragino Sans GB',
+          'Microsoft YaHei',
+          'Helvetica Neue',
+          'Helvetica',
+          'Arial',
+          'sans-serif',
+        ],
         mono: ['JetBrains Mono', 'SFMono-Regular', 'Consolas', 'monospace'],
       },
       keyframes: {

@@ -1,0 +1,116 @@
+{# ==========================================================================
+   Calendar · 排班日历（7 列网格 + 彩色事件条）
+   参数：
+     weeks    - 周数据：[{ days: [{ day, date, muted, holiday, events: [{ label, time, variant }] }] }]
+     weekdays - 星期表头（默认 周日~周六）
+   事件变体 variant：blue | green | red | orange | purple
+   ========================================================================== #}
+{% macro render(weeks=[], weekdays=["周日","周一","周二","周三","周四","周五","周六"]) %}
+<div class="overflow-hidden rounded-md border border-border bg-surface">
+  {# 星期表头 #}
+  <div class="grid grid-cols-7 border-b border-border bg-surface-hover">
+    {% for wd in weekdays %}
+    <div class="px-3 py-2 text-sm font-medium text-content-secondary">{{ wd }}</div>
+    {% endfor %}
+  </div>
+
+  {# 周行 #}
+  {% for week in weeks %}
+  <div class="grid grid-cols-7 border-b border-border last:border-b-0">
+    {% for day in week.days %}
+    <div class="min-h-24 border-r border-border p-2 last:border-r-0
+                {% if day.muted %}bg-surface-hover{% endif %}">
+      {# 日期数字 #}
+      <div class="mb-1 flex items-baseline gap-1">
+        <span class="text-sm font-medium tabular
+                     {% if day.holiday %}text-danger{% elif day.muted %}text-content-muted{% else %}text-content{% endif %}">
+          {{ day.day }}
+        </span>
+        {% if day.holiday %}
+        <span class="text-xs text-danger">{{ day.holiday }}</span>
+        {% endif %}
+      </div>
+
+      {# 事件条 #}
+      <div class="space-y-1">
+        {% for ev in day.events %}
+        {%- set variants = {
+          "blue":   "bg-stat-blue-bg text-stat-blue-fg",
+          "green":  "bg-stat-green-bg text-stat-green-fg",
+          "red":    "bg-stat-red-bg text-stat-red-fg",
+          "orange": "bg-stat-orange-bg text-stat-orange-fg",
+          "purple": "bg-stat-purple-bg text-stat-purple-fg"
+        } -%}
+        <div class="flex items-center justify-between gap-1 rounded-sm px-1.5 py-0.5 text-xs
+                    {{ variants[ev.variant] | default(variants['blue']) }}">
+          <span class="truncate">{{ ev.label }}</span>
+          {% if ev.time %}<span class="shrink-0 tabular opacity-80">{{ ev.time }}</span>{% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endfor %}
+</div>
+{% endmacro %}
+
+
+{# ==========================================================================
+   CalendarToolbar · 日历工具栏（时间选择 + 视图切换）
+   参数：
+     range    - 时间范围文字，如 "2026-10-01 ~ 2026-10-31"
+     tabs     - [{ label, active }]
+   ========================================================================== #}
+{% macro toolbar(range="", tabs=[]) %}
+<div class="flex flex-wrap items-center justify-between gap-3">
+  <div class="flex items-center gap-2">
+    <span class="text-sm text-content-secondary">时间选择：</span>
+    <div class="inline-flex h-8 items-center gap-2 rounded-md border border-border-strong bg-surface px-3 text-sm text-content">
+      <span class="tabular">{{ range }}</span>
+      <svg class="h-4 w-4 text-content-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
+      </svg>
+    </div>
+  </div>
+
+  {% if tabs %}
+  <div class="inline-flex items-center gap-1 rounded-md bg-surface-hover p-1">
+    {% for tab in tabs %}
+    <button type="button"
+            class="rounded-sm px-3 py-1 text-sm transition-colors duration-fast
+                   {% if tab.active %}bg-surface font-medium text-primary shadow-xs{% else %}text-content-secondary hover:text-content{% endif %}">
+      {{ tab.label }}
+    </button>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+{% endmacro %}
+
+
+{# ==========================================================================
+   NoticeBar · 提示条（参考图黄色提示条）
+   参数：
+     text     - 提示文字
+     variant  - warning | info | success | danger
+     expandable - 是否显示「展开」按钮
+   ========================================================================== #}
+{% macro notice(text="", variant="warning", expandable=false) %}
+{%- set variants = {
+  "warning": "border-warning-muted bg-warning-subtle text-warning",
+  "info":    "border-info-muted bg-info-subtle text-info",
+  "success": "border-success-muted bg-success-subtle text-success",
+  "danger":  "border-danger-muted bg-danger-subtle text-danger"
+} -%}
+<div class="flex items-center gap-2 rounded-md border px-3 py-2 text-sm
+            {{ variants[variant] | default(variants['warning']) }}">
+  <svg class="h-4 w-4 shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/>
+  </svg>
+  <span class="flex-1">{{ text }}</span>
+  {% if expandable %}
+  <button type="button" class="shrink-0 text-xs underline-offset-2 hover:underline">展开</button>
+  {% endif %}
+</div>
+{% endmacro %}

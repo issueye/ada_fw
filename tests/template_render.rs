@@ -27,6 +27,10 @@ fn admin_ctx(title: &str) -> serde_json::Value {
         "menu_items": [
             { "label": "仪表盘", "href": "/admin", "icon": "<svg></svg>", "active": true }
         ],
+        "tabs": [
+            { "label": "首页", "href": "/admin", "active": true, "closable": false },
+            { "label": "用户管理", "href": "/admin/users", "active": false, "closable": true }
+        ],
     })
 }
 
@@ -60,6 +64,7 @@ fn 仪表盘模板应可渲染() {
         "title": "仪表盘",
         "breadcrumb": [{ "label": "仪表盘", "href": "" }],
         "menu_items": [],
+        "tabs": [{ "label": "首页", "href": "/admin", "active": true, "closable": false }],
         "stats": [{
             "label": "总用户数", "value": "8", "trend": "+1%",
             "trend_up": true, "icon": "<svg></svg>", "variant": "primary"
@@ -93,6 +98,10 @@ fn 用户管理模板应可渲染() {
     // 分页应改为客户端驱动，不再出现服务端链接式分页。
     assert!(html.contains("goTo("), "分页应使用 goTo() 客户端切换");
     assert!(!html.contains("base_url"), "不应残留服务端分页参数");
+    // 新布局：蓝色顶栏 + 多页签栏。
+    assert!(html.contains("class=\"topbar"), "应渲染蓝色顶栏");
+    assert!(html.contains("tab-item"), "应渲染多页签栏");
+    assert!(html.contains("menu-item"), "侧边栏应使用 menu-item 类");
 }
 
 #[test]
@@ -130,4 +139,58 @@ fn 页面不存在模板应可渲染() {
     engine()
         .render("admin/404.html", json!({ "title": "页面不存在" }))
         .expect("404.html 渲染失败");
+}
+
+#[test]
+fn 日历组件应可渲染() {
+    let ctx = json!({
+        "weeks": [{
+            "days": [
+                { "day": 27, "muted": false, "holiday": "中秋节",
+                  "events": [{ "label": "白班", "time": "08:00-16:00", "variant": "blue" }] },
+                { "day": 28, "muted": false, "holiday": "",
+                  "events": [{ "label": "休息", "time": "", "variant": "green" }] },
+            ]
+        }]
+    });
+    let html = engine()
+        .render_str(
+            r#"{% import "components/calendar.html" as cal %}{{ cal.render(weeks=weeks) }}"#,
+            ctx,
+        )
+        .expect("日历组件渲染失败");
+    assert!(html.contains("周日"), "应渲染星期表头");
+    assert!(html.contains("中秋节"), "应渲染节假日标记");
+    assert!(html.contains("白班"), "应渲染事件条");
+}
+
+#[test]
+fn 指标卡组应可渲染() {
+    let ctx = json!({
+        "items": [
+            { "label": "总用户数", "value": "8", "variant": "blue" },
+            { "label": "活跃用户", "value": "5", "variant": "green" },
+        ]
+    });
+    let html = engine()
+        .render_str(
+            r#"{% import "components/data.html" as data %}{{ data.stat_group(items=items, cols=2) }}"#,
+            ctx,
+        )
+        .expect("指标卡组渲染失败");
+    assert!(html.contains("stat-card"), "���使用 stat-card 类");
+    assert!(html.contains("总用户数"), "应渲染指标名称");
+    assert!(html.contains("bg-stat-blue-bg"), "应渲染蓝色变体");
+}
+
+#[test]
+fn 提示条应可渲染() {
+    let html = engine()
+        .render_str(
+            r#"{% import "components/calendar.html" as cal %}{{ cal.notice(text="测试提示", variant="warning", expandable=true) }}"#,
+            json!({}),
+        )
+        .expect("提示条渲染失败");
+    assert!(html.contains("测试提示"));
+    assert!(html.contains("展开"));
 }

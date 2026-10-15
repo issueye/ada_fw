@@ -41,6 +41,39 @@ pub struct Crumb {
     pub href: &'static str,
 }
 
+/// 多页签项。
+#[derive(Serialize, Clone)]
+pub struct Tab {
+    /// 标签文字。
+    pub label: &'static str,
+    /// 链接。
+    pub href: &'static str,
+    /// 是否激活。
+    pub active: bool,
+    /// 是否可关闭（首页不可关闭）。
+    pub closable: bool,
+}
+
+/// 构建多页签栏，标记当前激活项。
+///
+/// 首页固定不可关闭，其余页签可关闭。
+pub fn build_tabs(active: &str) -> Vec<Tab> {
+    let item = |label, href| Tab {
+        label,
+        href,
+        active: href == active,
+        closable: href != "/admin",
+    };
+
+    vec![
+        item("首页", "/admin"),
+        item("用户管理", "/admin/users"),
+        item("表单示例", "/admin/forms"),
+        item("组件库", "/admin/ui-kit"),
+        item("设置", "/admin/settings"),
+    ]
+}
+
 /// 构建侧边栏菜单，标记当前激活项。
 pub fn build_menu(active: &str) -> Vec<MenuItem> {
     let item = |label, href, icon| MenuItem {
@@ -95,6 +128,7 @@ struct DashboardContext {
     title: &'static str,
     breadcrumb: Vec<Crumb>,
     menu_items: Vec<MenuItem>,
+    tabs: Vec<Tab>,
     stats: Vec<StatItem>,
     recent_users: Vec<User>,
     activities: Vec<Activity>,
@@ -124,6 +158,7 @@ struct UsersContext {
     title: &'static str,
     breadcrumb: Vec<Crumb>,
     menu_items: Vec<MenuItem>,
+    tabs: Vec<Tab>,
     users: Vec<User>,
     total: usize,
     active_count: usize,
@@ -136,6 +171,7 @@ struct FormsContext {
     title: &'static str,
     breadcrumb: Vec<Crumb>,
     menu_items: Vec<MenuItem>,
+    tabs: Vec<Tab>,
 }
 
 #[derive(Serialize)]
@@ -143,6 +179,7 @@ struct SettingsContext {
     title: &'static str,
     breadcrumb: Vec<Crumb>,
     menu_items: Vec<MenuItem>,
+    tabs: Vec<Tab>,
 }
 
 #[derive(Serialize)]
@@ -150,6 +187,7 @@ struct UiKitContext {
     title: &'static str,
     breadcrumb: Vec<Crumb>,
     menu_items: Vec<MenuItem>,
+    tabs: Vec<Tab>,
     components: Vec<ComponentGroup>,
 }
 
@@ -181,7 +219,7 @@ pub async fn dashboard(State(state): State<AppState>) -> AppResult<Html<String>>
             trend: "+12.5%",
             trend_up: true,
             icon: icons::USERS,
-            variant: "primary",
+            variant: "blue",
         },
         StatItem {
             label: "活跃用户",
@@ -189,7 +227,7 @@ pub async fn dashboard(State(state): State<AppState>) -> AppResult<Html<String>>
             trend: "+8.2%",
             trend_up: true,
             icon: icons::ACTIVITY,
-            variant: "success",
+            variant: "green",
         },
         StatItem {
             label: "待激活",
@@ -197,7 +235,7 @@ pub async fn dashboard(State(state): State<AppState>) -> AppResult<Html<String>>
             trend: "-3.1%",
             trend_up: false,
             icon: icons::TRENDING,
-            variant: "warning",
+            variant: "orange",
         },
         StatItem {
             label: "本月收入",
@@ -205,7 +243,7 @@ pub async fn dashboard(State(state): State<AppState>) -> AppResult<Html<String>>
             trend: "+23.4%",
             trend_up: true,
             icon: icons::DOLLAR,
-            variant: "info",
+            variant: "purple",
         },
     ];
 
@@ -223,6 +261,7 @@ pub async fn dashboard(State(state): State<AppState>) -> AppResult<Html<String>>
         title: "仪表盘",
         breadcrumb: crumbs(&[("首页", "/admin"), ("仪表盘", "")]),
         menu_items: build_menu("/admin"),
+        tabs: build_tabs("/admin"),
         stats,
         recent_users,
         activities,
@@ -240,6 +279,7 @@ pub async fn users(State(state): State<AppState>) -> AppResult<Html<String>> {
         title: "用户管理",
         breadcrumb: crumbs(&[("首页", "/admin"), ("用户管理", "")]),
         menu_items: build_menu("/admin/users"),
+        tabs: build_tabs("/admin/users"),
         users: store.list_users(),
         total: store.user_count(),
         active_count: store.user_count_by_status(UserStatus::Active),
@@ -254,9 +294,10 @@ pub async fn users(State(state): State<AppState>) -> AppResult<Html<String>> {
 /// `GET /admin/forms` —— 表单示例。
 pub async fn forms(State(state): State<AppState>) -> AppResult<Html<String>> {
     let ctx = FormsContext {
-        title: "表单示例",
+        title: "表单示��",
         breadcrumb: crumbs(&[("首页", "/admin"), ("表单示例", "")]),
         menu_items: build_menu("/admin/forms"),
+        tabs: build_tabs("/admin/forms"),
     };
 
     let html = state.engine.render("admin/forms.html", ctx)?;
@@ -269,6 +310,7 @@ pub async fn settings(State(state): State<AppState>) -> AppResult<Html<String>> 
         title: "设置",
         breadcrumb: crumbs(&[("首页", "/admin"), ("设置", "")]),
         menu_items: build_menu("/admin/settings"),
+        tabs: build_tabs("/admin/settings"),
     };
 
     let html = state.engine.render("admin/settings.html", ctx)?;
@@ -295,6 +337,7 @@ pub async fn ui_kit(State(state): State<AppState>) -> AppResult<Html<String>> {
         title: "组件库",
         breadcrumb: crumbs(&[("首页", "/admin"), ("组件库", "")]),
         menu_items: build_menu("/admin/ui-kit"),
+        tabs: build_tabs("/admin/ui-kit"),
         components,
     };
 

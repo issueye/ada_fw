@@ -72,7 +72,14 @@ pub const BUILTIN_COMPONENTS: &[ComponentMeta] = &[
         name: "data",
         path: "components/data.html",
         category: "数据",
-        description: "数据表格、表单容器、指标卡",
+        description: "数据表格、表单容器、指标卡、指标卡组",
+    },
+    // ---- 业务组件 ----
+    ComponentMeta {
+        name: "calendar",
+        path: "components/calendar.html",
+        category: "业务",
+        description: "排班日历、日历工具栏、提示条",
     },
 ];
 
@@ -118,9 +125,9 @@ mod tests {
     }
 
     #[test]
-    fn 组件清单应覆盖五个分类() {
+    fn 组件清单应覆盖六个分类() {
         let cats = components_by_category();
-        assert_eq!(cats.len(), 5, "应有 基础/展示/导航/反馈/数据 五个分类");
+        assert_eq!(cats.len(), 6, "应有 基础/展示/导航/反馈/数据/业务 六个分类");
     }
 
     #[test]

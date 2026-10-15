@@ -7,21 +7,22 @@
 {% import "components/form-controls.html" as fc %}
 {% import "components/navigation.html" as nav %}
 {% import "components/feedback.html" as feedback %}
+{% import "components/calendar.html" as cal %}
 
 {% block content %}
-<div class="space-y-6" x-data="{ openModal: null, openDrawer: null, tab: 'a' }">
+<div class="space-y-4" x-data="{ openModal: null, openDrawer: null, tab: 'a' }">
   <div>
-    <h1 class="text-2xl font-semibold tracking-tight text-content">组件库</h1>
-    <p class="mt-1 text-sm text-content-secondary">Ada Design System 全部组件的可视化预览。</p>
+    <h1 class="text-lg font-semibold text-content">组件库</h1>
+    <p class="mt-0.5 text-sm text-content-secondary">Ada Design System 全部组件的可视化预览。</p>
   </div>
 
   {# 组件清单 #}
-  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+  <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-6">
     {% for group in components %}
-    <div class="card p-4">
+    <div class="card p-3">
       <p class="text-sm font-semibold text-content">{{ group.category }}</p>
-      <p class="mt-1 text-xs text-content-muted">{{ group.items | length }} 个组件</p>
-      <ul class="mt-3 space-y-1">
+      <p class="mt-0.5 text-xs text-content-muted">{{ group.items | length }} 个组件</p>
+      <ul class="mt-2 space-y-0.5">
         {% for item in group.items %}
         <li class="truncate text-xs text-content-secondary" title="{{ item.description }}">{{ item.name }}</li>
         {% endfor %}
@@ -29,6 +30,66 @@
     </div>
     {% endfor %}
   </div>
+
+  {# ---- 指标卡组 ---- #}
+  {% call data.render(title="StatGroup · 指标卡组", subtitle="多色并排，适合数据概览") %}
+  {{ data.stat_group(cols=5, items=[
+    {"label": "排班总时长（小时）", "value": "77.20", "variant": "blue"},
+    {"label": "班量总计", "value": "10.00", "variant": "orange"},
+    {"label": "出勤天数", "value": "9.00", "variant": "green"},
+    {"label": "值班天数", "value": "9.00", "variant": "purple"},
+    {"label": "请假统计（小时）", "value": "0.00", "variant": "red"}
+  ]) }}
+  {% endcall %}
+
+  {# ---- 提示条 ---- #}
+  {% call data.render(title="NoticeBar · 提示条", subtitle="四种语义变体") %}
+  <div class="space-y-2">
+    {{ cal.notice(text="2026-10-14 ~ 2026-10-18 测试测试测试测试啊啊啊啊啊", variant="warning", expandable=true) }}
+    {{ cal.notice(text="这是一条信息提示", variant="info") }}
+    {{ cal.notice(text="操作已成功完成", variant="success") }}
+    {{ cal.notice(text="操作失败，请重试", variant="danger") }}
+  </div>
+  {% endcall %}
+
+  {# ---- 排班日历 ---- #}
+  {% call data.render(title="Calendar · 排班日历", subtitle="7 列网格 + 彩色事件条") %}
+  <div class="space-y-3">
+    {{ cal.toolbar(range="2026-10-01 ~ 2026-10-31", tabs=[
+      {"label": "我的排班", "active": true},
+      {"label": "排班统计", "active": false}
+    ]) }}
+    {{ cal.render(weeks=[
+      {"days": [
+        {"day": 27, "holiday": "中秋节", "events": [{"label": "白班（下午）", "time": "13:00-19:00", "variant": "blue"}]},
+        {"day": 28, "events": []},
+        {"day": 29, "events": []},
+        {"day": 30, "events": []},
+        {"day": 1, "holiday": "国庆节", "events": [{"label": "白班（下午）", "time": "13:00-19:00", "variant": "blue"}]},
+        {"day": 2, "holiday": "国庆节", "events": [{"label": "跨天测试", "time": "20:00-06:00", "variant": "blue"}]},
+        {"day": 3, "holiday": "国庆节", "events": [{"label": "白班（下午）", "time": "13:00-19:00", "variant": "blue"}]}
+      ]},
+      {"days": [
+        {"day": 4, "holiday": "国庆节", "events": [{"label": "跨天测试", "time": "20:00-06:00", "variant": "blue"}]},
+        {"day": 5, "holiday": "国庆节", "events": [{"label": "休息", "variant": "green"}]},
+        {"day": 6, "holiday": "国庆节", "events": [{"label": "休息", "variant": "green"}]},
+        {"day": 7, "holiday": "国庆节", "events": [{"label": "休息", "variant": "green"}]},
+        {"day": 8, "events": [{"label": "休息", "variant": "green"}]},
+        {"day": 9, "events": [{"label": "休息", "variant": "green"}]},
+        {"day": 10, "events": [{"label": "休息", "variant": "green"}]}
+      ]},
+      {"days": [
+        {"day": 11, "events": [{"label": "休息", "variant": "green"}]},
+        {"day": 12, "events": [{"label": "休息", "variant": "green"}]},
+        {"day": 13, "events": [{"label": "休息", "variant": "green"}]},
+        {"day": 14, "events": [{"label": "跨天测试", "time": "20:00-06:00", "variant": "blue"}]},
+        {"day": 15, "events": [{"label": "test", "time": "01:28-12:32", "variant": "red"}]},
+        {"day": 16, "events": [{"label": "test", "time": "01:28-12:32", "variant": "red"}]},
+        {"day": 17, "events": [{"label": "跨天测试", "time": "20:00-06:00", "variant": "blue"}]}
+      ]}
+    ]) }}
+  </div>
+  {% endcall %}
 
   {# ---- 按钮 ---- #}
   {% call data.render(title="Button · 按钮", subtitle="五种变体 × 三档尺寸") %}

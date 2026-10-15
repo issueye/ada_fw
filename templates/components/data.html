@@ -39,7 +39,7 @@
           {% if selectable %}
           <th class="w-12">
             <input type="checkbox"
-                   class="h-4 w-4 rounded-sm border-border-strong text-primary focus:ring-2 focus:ring-primary/30"
+                   class="h-4 w-4 rounded-sm border-border-strong text-primary focus:ring-2 focus:ring-primary"
                    aria-label="全选">
           </th>
           {% endif %}
@@ -87,7 +87,7 @@
             {% if selectable %}
             <td>
               <input type="checkbox"
-                     class="h-4 w-4 rounded-sm border-border-strong text-primary focus:ring-2 focus:ring-primary/30"
+                     class="h-4 w-4 rounded-sm border-border-strong text-primary focus:ring-2 focus:ring-primary"
                      aria-label="选择行">
             </td>
             {% endif %}
@@ -145,49 +145,81 @@
 
 
 {# ==========================================================================
-   StatCard · 指标卡
+   StatCard · 指标卡（浅色底 + 大号数字 + 右侧水印图标）
    参数：
      label     - 指标名称
      value     - 指标值
      trend     - 趋势值，如 "+12.5%"
      trend_up  - 是否上升（决定颜色）
-     icon      - 图标 SVG
-     variant   - 图标底色变体
+     icon      - 图标 SVG（作为右侧水印）
+     variant   - 配色变体：blue | orange | green | purple | red
    ========================================================================== #}
-{% macro stat_card(label, value, trend="", trend_up=true, icon="", variant="primary") %}
+{% macro stat_card(label, value, trend="", trend_up=true, icon="", variant="blue") %}
 {%- set variants = {
-  "primary": "bg-primary-subtle text-primary",
-  "success": "bg-success-subtle text-success",
-  "warning": "bg-warning-subtle text-warning",
-  "danger":  "bg-danger-subtle text-danger",
-  "info":    "bg-info-subtle text-info"
+  "blue":   "bg-stat-blue-bg text-stat-blue-fg",
+  "orange": "bg-stat-orange-bg text-stat-orange-fg",
+  "green":  "bg-stat-green-bg text-stat-green-fg",
+  "purple": "bg-stat-purple-bg text-stat-purple-fg",
+  "red":    "bg-stat-red-bg text-stat-red-fg",
+  "primary": "bg-stat-blue-bg text-stat-blue-fg",
+  "success": "bg-stat-green-bg text-stat-green-fg",
+  "warning": "bg-stat-orange-bg text-stat-orange-fg",
+  "danger":  "bg-stat-red-bg text-stat-red-fg",
+  "info":    "bg-stat-blue-bg text-stat-blue-fg"
 } -%}
-<div class="card p-6">
-  <div class="flex items-start justify-between gap-4">
-    <div class="min-w-0 flex-1">
-      <p class="truncate text-sm text-content-secondary">{{ label }}</p>
-      <p class="mt-2 text-2xl font-semibold tabular text-content">{{ value }}</p>
-      {% if trend %}
-      <div class="mt-2 flex items-center gap-1 text-xs">
-        <span class="inline-flex items-center gap-0.5 font-medium {% if trend_up %}text-success{% else %}text-danger{% endif %}">
-          <svg class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-            {% if trend_up %}
-            <path fill-rule="evenodd" d="M10 17a.75.75 0 01-.75-.75V5.612L5.29 9.77a.75.75 0 01-1.08-1.04l5.25-5.5a.75.75 0 011.08 0l5.25 5.5a.75.75 0 11-1.08 1.04l-3.96-4.158V16.25A.75.75 0 0110 17z" clip-rule="evenodd"/>
-            {% else %}
-            <path fill-rule="evenodd" d="M10 3a.75.75 0 01.75.75v10.638l3.96-4.158a.75.75 0 111.08 1.04l-5.25 5.5a.75.75 0 01-1.08 0l-5.25-5.5a.75.75 0 111.08-1.04l3.96 4.158V3.75A.75.75 0 0110 3z" clip-rule="evenodd"/>
-            {% endif %}
-          </svg>
-          {{ trend }}
-        </span>
-        <span class="text-content-muted">较上期</span>
-      </div>
-      {% endif %}
-    </div>
-    {% if icon %}
-    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg {{ variants[variant] | default(variants['primary']) }}">
-      <span class="h-5 w-5" aria-hidden="true">{{ icon | safe }}</span>
-    </div>
-    {% endif %}
+<div class="stat-card {{ variants[variant] | default(variants['blue']) }}">
+  {# 右侧水印图标 #}
+  {% if icon %}
+  <span class="pointer-events-none absolute -right-2 -bottom-2 h-16 w-16 opacity-10" aria-hidden="true">
+    {{ icon | safe }}
+  </span>
+  {% endif %}
+
+  <p class="stat-card-label">{{ label }}</p>
+  <p class="stat-card-value">{{ value }}</p>
+
+  {% if trend %}
+  <div class="mt-1 flex items-center gap-1 text-xs">
+    <span class="inline-flex items-center gap-0.5 font-medium {% if trend_up %}text-success{% else %}text-danger{% endif %}">
+      <svg class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+        {% if trend_up %}
+        <path fill-rule="evenodd" d="M10 17a.75.75 0 01-.75-.75V5.612L5.29 9.77a.75.75 0 01-1.08-1.04l5.25-5.5a.75.75 0 011.08 0l5.25 5.5a.75.75 0 11-1.08 1.04l-3.96-4.158V16.25A.75.75 0 0110 17z" clip-rule="evenodd"/>
+        {% else %}
+        <path fill-rule="evenodd" d="M10 3a.75.75 0 01.75.75v10.638l3.96-4.158a.75.75 0 111.08 1.04l-5.25 5.5a.75.75 0 01-1.08 0l-5.25-5.5a.75.75 0 111.08-1.04l3.96 4.158V3.75A.75.75 0 0110 3z" clip-rule="evenodd"/>
+        {% endif %}
+      </svg>
+      {{ trend }}
+    </span>
+    <span class="opacity-70">较上期</span>
   </div>
+  {% endif %}
+</div>
+{% endmacro %}
+
+
+{# ==========================================================================
+   StatGroup · 指标卡组（多色并排，参考图 5 列布局）
+   参数：
+     items - [{ label, value, trend, trend_up, icon, variant }]
+     cols  - 列数（默认 5）
+   ========================================================================== #}
+{% macro stat_group(items=[], cols=5) %}
+{%- set grid = {
+  2: "grid-cols-1 sm:grid-cols-2",
+  3: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
+  4: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4",
+  5: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-5"
+} -%}
+<div class="grid gap-3 {{ grid[cols] | default(grid[5]) }}">
+  {% for item in items %}
+  {{ stat_card(
+    label=item.label,
+    value=item.value,
+    trend=item.trend | default(""),
+    trend_up=item.trend_up | default(true),
+    icon=item.icon | default(""),
+    variant=item.variant | default("blue")
+  ) }}
+  {% endfor %}
 </div>
 {% endmacro %}

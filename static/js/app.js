@@ -58,6 +58,15 @@ document.addEventListener('alpine:init', () => {
       document.documentElement.setAttribute('data-theme', this.theme);
       localStorage.setItem('ada-theme', this.theme);
     },
+
+    /** 全屏切换。 */
+    toggleFullscreen() {
+      if (document.fullscreenElement) {
+        document.exitFullscreen();
+      } else {
+        document.documentElement.requestFullscreen?.();
+      }
+    },
   }));
 
   /* ======================================================================

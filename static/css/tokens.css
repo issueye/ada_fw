@@ -2,63 +2,86 @@
    Ada Design System · 设计令牌
    语义令牌层：业务代码只使用这一层，不直接引用基础色阶。
    通过 <html data-theme="dark"> 切换暗色模式。
+
+   设计基调：企业级管理后台（Element Plus / Ant Design 调性）
+   - 主色为高饱和亮蓝，顶栏整条铺满主色
+   - 圆角克制（2-6px），阴影极弱，以边框区分层级
+   - 信息密度高，适合数据密集型场景
    ========================================================================== */
 
 :root {
-  /* ---- 主色（Indigo） ---- */
-  --color-primary-subtle: #eef2ff;
-  --color-primary-muted: #c7d2fe;
-  --color-primary: #4f46e5;
-  --color-primary-hover: #4338ca;
-  --color-primary-active: #3730a3;
+  /* ---- 主色（Bright Blue） ---- */
+  --color-primary-subtle: #e8f3ff;
+  --color-primary-muted: #a3ccff;
+  --color-primary: #1677ff;
+  --color-primary-hover: #4096ff;
+  --color-primary-active: #0958d9;
   --color-primary-fg: #ffffff;
 
+  /* ---- 顶栏（深蓝，铺满主色） ---- */
+  --color-topbar-bg: #1677ff;
+  --color-topbar-fg: #ffffff;
+  --color-topbar-hover: rgb(255 255 255 / 0.16);
+  --color-topbar-active: rgb(255 255 255 / 0.24);
+
   /* ---- 中性色 ---- */
-  --color-bg: #f8fafc;
+  --color-bg: #f0f2f5;
   --color-surface: #ffffff;
-  --color-surface-hover: #f1f5f9;
-  --color-surface-active: #e2e8f0;
-  --color-border: #e2e8f0;
-  --color-border-strong: #cbd5e1;
-  --color-text: #0f172a;
-  --color-text-secondary: #475569;
-  --color-text-muted: #94a3b8;
+  --color-surface-hover: #f5f7fa;
+  --color-surface-active: #e8eaed;
+  --color-border: #e4e7ed;
+  --color-border-strong: #d4d7de;
+  --color-text: #1f2329;
+  --color-text-secondary: #5c6370;
+  --color-text-muted: #8f959e;
   --color-text-inverse: #ffffff;
 
   /* ---- 功能色 ---- */
-  --color-success-subtle: #f0fdf4;
-  --color-success-muted: #bbf7d0;
-  --color-success: #16a34a;
+  --color-success-subtle: #e8f8ee;
+  --color-success-muted: #a8e0bd;
+  --color-success: #00a854;
   --color-success-fg: #ffffff;
 
-  --color-warning-subtle: #fffbeb;
-  --color-warning-muted: #fde68a;
-  --color-warning: #d97706;
+  --color-warning-subtle: #fff5e6;
+  --color-warning-muted: #ffd591;
+  --color-warning: #fa8c16;
   --color-warning-fg: #ffffff;
 
-  --color-danger-subtle: #fef2f2;
-  --color-danger-muted: #fecaca;
-  --color-danger: #dc2626;
-  --color-danger-hover: #b91c1c;
+  --color-danger-subtle: #fff1f0;
+  --color-danger-muted: #ffccc7;
+  --color-danger: #f5222d;
+  --color-danger-hover: #d9363e;
   --color-danger-fg: #ffffff;
 
-  --color-info-subtle: #f0f9ff;
-  --color-info-muted: #bae6fd;
-  --color-info: #0284c7;
+  --color-info-subtle: #e6f7ff;
+  --color-info-muted: #91d5ff;
+  --color-info: #1890ff;
   --color-info-fg: #ffffff;
 
-  /* ---- 圆角 ---- */
-  --radius-sm: 4px;
-  --radius-md: 6px;
-  --radius-lg: 8px;
-  --radius-xl: 12px;
+  /* ---- 统计卡专用浅色底（参考图 5 色并排） ---- */
+  --color-stat-blue-bg: #e8f3ff;
+  --color-stat-blue-fg: #1677ff;
+  --color-stat-orange-bg: #fff5e6;
+  --color-stat-orange-fg: #fa8c16;
+  --color-stat-green-bg: #e8f8ee;
+  --color-stat-green-fg: #00a854;
+  --color-stat-purple-bg: #f4eeff;
+  --color-stat-purple-fg: #722ed1;
+  --color-stat-red-bg: #fff1f0;
+  --color-stat-red-fg: #f5222d;
 
-  /* ---- 阴影 ---- */
-  --shadow-xs: 0 1px 2px 0 rgb(15 23 42 / 0.04);
-  --shadow-sm: 0 1px 3px 0 rgb(15 23 42 / 0.08), 0 1px 2px -1px rgb(15 23 42 / 0.06);
-  --shadow-md: 0 4px 6px -1px rgb(15 23 42 / 0.08), 0 2px 4px -2px rgb(15 23 42 / 0.06);
-  --shadow-lg: 0 10px 15px -3px rgb(15 23 42 / 0.10), 0 4px 6px -4px rgb(15 23 42 / 0.06);
-  --shadow-xl: 0 20px 25px -5px rgb(15 23 42 / 0.12), 0 8px 10px -6px rgb(15 23 42 / 0.06);
+  /* ---- 圆角（克制） ---- */
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+  --radius-xl: 8px;
+
+  /* ---- 阴影（极弱，以边框为主） ---- */
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.03);
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 2px 8px 0 rgb(0 0 0 / 0.08);
+  --shadow-lg: 0 4px 16px 0 rgb(0 0 0 / 0.10);
+  --shadow-xl: 0 8px 24px 0 rgb(0 0 0 / 0.12);
 
   /* ---- 动效 ---- */
   --duration-fast: 100ms;
@@ -69,9 +92,10 @@
   --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
 
   /* ---- 布局 ---- */
-  --sidebar-width: 240px;
-  --sidebar-width-collapsed: 64px;
-  --topbar-height: 56px;
+  --sidebar-width: 200px;
+  --sidebar-width-collapsed: 56px;
+  --topbar-height: 48px;
+  --tabbar-height: 40px;
 }
 
 /* ==========================================================================
@@ -80,53 +104,71 @@
 
 [data-theme="dark"] {
   /* ---- 主色 ---- */
-  --color-primary-subtle: #312e81;
-  --color-primary-muted: #4338ca;
-  --color-primary: #6366f1;
-  --color-primary-hover: #818cf8;
-  --color-primary-active: #a5b4fc;
+  --color-primary-subtle: #111d2c;
+  --color-primary-muted: #15395b;
+  --color-primary: #1677ff;
+  --color-primary-hover: #4096ff;
+  --color-primary-active: #0958d9;
   --color-primary-fg: #ffffff;
 
+  /* ---- 顶栏 ---- */
+  --color-topbar-bg: #15395b;
+  --color-topbar-fg: #ffffff;
+  --color-topbar-hover: rgb(255 255 255 / 0.12);
+  --color-topbar-active: rgb(255 255 255 / 0.20);
+
   /* ---- 中性色 ---- */
-  --color-bg: #0f172a;
-  --color-surface: #1e293b;
-  --color-surface-hover: #334155;
-  --color-surface-active: #475569;
-  --color-border: #334155;
-  --color-border-strong: #475569;
-  --color-text: #f1f5f9;
-  --color-text-secondary: #cbd5e1;
-  --color-text-muted: #64748b;
-  --color-text-inverse: #0f172a;
+  --color-bg: #141414;
+  --color-surface: #1f1f1f;
+  --color-surface-hover: #2a2a2a;
+  --color-surface-active: #333333;
+  --color-border: #303030;
+  --color-border-strong: #424242;
+  --color-text: #e8e8e8;
+  --color-text-secondary: #a6a6a6;
+  --color-text-muted: #6b6b6b;
+  --color-text-inverse: #141414;
 
   /* ---- 功能色 ---- */
-  --color-success-subtle: #052e16;
-  --color-success-muted: #166534;
-  --color-success: #22c55e;
-  --color-success-fg: #052e16;
+  --color-success-subtle: #0d2818;
+  --color-success-muted: #135200;
+  --color-success: #49aa19;
+  --color-success-fg: #ffffff;
 
-  --color-warning-subtle: #451a03;
-  --color-warning-muted: #92400e;
-  --color-warning: #f59e0b;
-  --color-warning-fg: #451a03;
+  --color-warning-subtle: #2b1d11;
+  --color-warning-muted: #613400;
+  --color-warning: #d89614;
+  --color-warning-fg: #ffffff;
 
-  --color-danger-subtle: #450a0a;
-  --color-danger-muted: #991b1b;
-  --color-danger: #ef4444;
-  --color-danger-hover: #f87171;
-  --color-danger-fg: #450a0a;
+  --color-danger-subtle: #2a1215;
+  --color-danger-muted: #58181c;
+  --color-danger: #d32029;
+  --color-danger-hover: #e84749;
+  --color-danger-fg: #ffffff;
 
-  --color-info-subtle: #082f49;
-  --color-info-muted: #075985;
-  --color-info: #38bdf8;
-  --color-info-fg: #082f49;
+  --color-info-subtle: #111d2c;
+  --color-info-muted: #15395b;
+  --color-info: #177ddc;
+  --color-info-fg: #ffffff;
+
+  /* ---- 统计卡浅色底（暗色下改为深色底） ---- */
+  --color-stat-blue-bg: #111d2c;
+  --color-stat-blue-fg: #4096ff;
+  --color-stat-orange-bg: #2b1d11;
+  --color-stat-orange-fg: #d89614;
+  --color-stat-green-bg: #0d2818;
+  --color-stat-green-fg: #49aa19;
+  --color-stat-purple-bg: #1a1325;
+  --color-stat-purple-fg: #9254de;
+  --color-stat-red-bg: #2a1215;
+  --color-stat-red-fg: #d32029;
 
   /* ---- 阴影：暗色下减弱，改用边框区分层级 ---- */
   --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.20);
-  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.30), 0 1px 2px -1px rgb(0 0 0 / 0.20);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.35), 0 2px 4px -2px rgb(0 0 0 / 0.25);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.40), 0 4px 6px -4px rgb(0 0 0 / 0.30);
-  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.45), 0 8px 10px -6px rgb(0 0 0 / 0.35);
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.30);
+  --shadow-md: 0 2px 8px 0 rgb(0 0 0 / 0.35);
+  --shadow-lg: 0 4px 16px 0 rgb(0 0 0 / 0.40);
+  --shadow-xl: 0 8px 24px 0 rgb(0 0 0 / 0.45);
 }
 
 /* ==========================================================================
@@ -148,9 +190,11 @@ html {
 body {
   background-color: var(--color-bg);
   color: var(--color-text);
-  font-family: "Inter", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial,
+    sans-serif;
   font-size: 14px;
-  line-height: 20px;
+  line-height: 22px;
   -webkit-font-smoothing: antialiased;
 }
 
