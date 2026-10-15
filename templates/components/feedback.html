@@ -107,10 +107,13 @@
 
 {# ==========================================================================
    Toast · 轻提示容器
-   在页面中放置一次，由 Alpine 的 toast() 方法驱动。
+   在页面中放置一次即可，组件自带 x-data，无需页面提供作用域。
+   触发方式（任意位置）：
+     $dispatch('ada-toast', { title: '成功', message: '已保存', type: 'success' })
    ========================================================================== #}
 {% macro toast_container() %}
-<div class="pointer-events-none fixed right-4 top-4 z-[60] flex w-full max-w-sm flex-col gap-2"
+<div x-data="feedback()" @ada-toast.window="toast($event.detail.title, $event.detail.message, $event.detail.type)"
+     class="pointer-events-none fixed right-4 top-4 z-[60] flex w-full max-w-sm flex-col gap-2"
      role="region" aria-live="polite" aria-label="通知">
   <template x-for="t in toasts" :key="t.id">
     <div class="pointer-events-auto flex items-start gap-3 rounded-lg border p-4 shadow-lg animate-toast-in"
@@ -167,10 +170,15 @@
 
 {# ==========================================================================
    Confirm · 二次确认弹窗（危险操作专用）
-   控制：Alpine 变量 confirmState = { open, title, message, onConfirm }
+   组件自带 x-data，无需页面提供作用域。
+   触发方式（任意位置）：
+     $dispatch('ada-confirm', { title: '确认删除', message: '此操作不可撤销' })
+   确认后派发 ada-confirm-ok 事件，由调用方监听处理。
    ========================================================================== #}
 {% macro confirm_dialog() %}
-<div x-show="confirmState.open" x-cloak
+<div x-data="feedback()"
+     @ada-confirm.window="confirm($event.detail.title, $event.detail.message)"
+     x-show="confirmState.open" x-cloak
      class="fixed inset-0 z-[70] flex items-center justify-center p-4"
      role="alertdialog" aria-modal="true" @keydown.escape.window="confirmState.open = false">
   <div class="absolute inset-0 bg-black/50 animate-fade-in" @click="confirmState.open = false"></div>
@@ -194,8 +202,7 @@
       <button type="button" @click="confirmState.onConfirm && confirmState.onConfirm(); confirmState.open = false"
               class="inline-flex h-9 items-center rounded-md bg-danger px-4 text-sm font-medium text-danger-fg shadow-xs transition-colors duration-base hover:bg-danger-hover focus-ring">
         确认
-      </button>
-    </div>
+      </button>    </div>
   </div>
 </div>
 {% endmacro %}

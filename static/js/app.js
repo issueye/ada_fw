@@ -41,7 +41,12 @@ document.addEventListener('alpine:init', () => {
   }));
 
   /* ======================================================================
-     全��反馈：Toast + Confirm
+  /* ======================================================================
+     全局反馈：Toast + Confirm
+     通过 window 事件触发，与调用方解耦：
+       $dispatch('ada-toast',   { title, message, type })
+       $dispatch('ada-confirm', { title, message })
+     确认后派发 ada-confirm-ok 事件。
      ====================================================================== */
   Alpine.data('feedback', () => ({
     toasts: [],
@@ -60,9 +65,14 @@ document.addEventListener('alpine:init', () => {
       this.toasts = this.toasts.filter((t) => t.id !== id);
     },
 
-    /** 弹出二次确认。 */
-    confirm(title, message, onConfirm) {
-      this.confirmState = { open: true, title, message, onConfirm };
+    /** 弹出二次确认。确认后派发 ada-confirm-ok 事件。 */
+    confirm(title, message) {
+      this.confirmState = {
+        open: true,
+        title,
+        message,
+        onConfirm: () => this.$dispatch('ada-confirm-ok'),
+      };
     },
   }));
 
@@ -102,14 +112,13 @@ document.addEventListener('alpine:init', () => {
     },
 
     async remove(user) {
-      const fb = this.$root._x_dataStack?.find((d) => d.confirm);
       try {
         await this.request(`/api/users/${user.id}`, { method: 'DELETE' });
         this.users = this.users.filter((u) => u.id !== user.id);
-        this.$dispatch('toast', { title: '删除成功', message: `已删除用户 ${user.name}`, type: 'success' });
+        this.$dispatch('ada-toast', { title: '删除成功', message: `已删除用户 ${user.name}`, type: 'success' });
       } catch (e) {
         this.error = e.message;
-        this.$dispatch('toast', { title: '删除失败', message: e.message, type: 'danger' });
+        this.$dispatch('ada-toast', { title: '删除失败', message: e.message, type: 'danger' });
       }
     },
 

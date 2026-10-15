@@ -186,7 +186,7 @@
   <div class="flex flex-wrap gap-3">
     {{ button.render(label="打开弹窗", variant="primary", attrs='@click="openModal = \'demoModal\'"') }}
     {{ button.render(label="打开抽屉", variant="outline", attrs='@click="openDrawer = \'demoDrawer\'"') }}
-    {{ button.render(label="轻提示", variant="secondary", attrs='@click="$root.__toast({title: \'操作成功\', message: \'数据已保存\', type: \'success\'})"') }}
+    {{ button.render(label="轻提示", variant="secondary", attrs='@click="$dispatch(\'ada-toast\', {title: \'操作成功\', message: \'数据已保存\', type: \'success\'})"') }}
   </div>
 
   {% call feedback.with_footer(

@@ -39,7 +39,7 @@
 
       {# 登录表单 #}
       <div class="card p-6">
-        <form class="space-y-5" @submit.prevent="$root.__toast({title: '登录成功', message: '正在跳转…', type: 'success'}); setTimeout(() => window.location.href = '/admin', 800)">
+        <form class="space-y-5" @submit.prevent="$dispatch('ada-toast', {title: '登录成功', message: '正在跳转…', type: 'success'}); setTimeout(() => window.location.href = '/admin', 800)">
           <div class="space-y-1.5">
             <label for="login-email" class="block text-sm font-medium text-content">邮箱</label>
             <input id="login-email" name="email" type="email" required
@@ -89,5 +89,9 @@
       </p>
     </div>
   </div>
+
+  {# 全局轻提示容器 #}
+  {% import "components/feedback.html" as feedback %}
+  {{ feedback.toast_container() }}
 </body>
 </html>
