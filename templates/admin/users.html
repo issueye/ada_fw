@@ -2,77 +2,75 @@
 
 {% import "components/data.html" as data %}
 {% import "components/display.html" as display %}
+{% import "components/page.html" as page %}
 {% import "components/button.html" as button %}
 {% import "components/input.html" as input %}
 {% import "components/feedback.html" as feedback %}
+{% import "components/navigation.html" as nav %}
 
 {% block content %}
-<div class="space-y-6" x-data="userManager()">
-  {# 页面标题 + 操作 #}
-  <div class="flex flex-wrap items-center justify-between gap-4">
-    <div>
-      <h1 class="text-2xl font-semibold tracking-tight text-content">用户管理</h1>
-      <p class="mt-1 text-sm text-content-secondary">管理系统中的所有用户账号。</p>
-    </div>
-    <div class="flex items-center gap-2">
-      {{ button.render(label="导出", variant="outline", size="md", icon='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>') }}
-      {{ button.render(label="新建用户", variant="primary", size="md", attrs='@click="openCreate()"', icon='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>') }}
-    </div>
+<div class="space-y-5" x-data="userManager()" @ada-confirm-ok.window="onConfirmOk($event.detail)">
+
+  {# ==================== 页面头 ==================== #}
+  {{ page.header(
+    title="用户管理",
+    description="管理系统中的所有用户账号、角色与访问状态。",
+    actions=
+      button.render(label="导出", variant="outline", icon='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5M12 15V3"/></svg>')
+      ~ button.render(label="新建用户", variant="primary", attrs='@click="openCreate()"', icon='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>')
+  ) }}
+
+  {# ==================== 账号概览 ==================== #}
+  <div class="card px-5 py-4">
+    {{ display.stat_row(items=[
+      {"label": "总用户", "value": total},
+      {"label": "启用", "value": active_count, "tone": "success"},
+      {"label": "待激活", "value": pending_count, "tone": "warning"},
+      {"label": "停用", "value": inactive_count, "tone": "default"}
+    ]) }}
   </div>
 
-  {# 统计条 #}
-  <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
-    <div class="card p-4">
-      <p class="text-xs text-content-secondary">总用户</p>
-      <p class="mt-1 text-xl font-semibold tabular text-content">{{ total }}</p>
-    </div>
-    <div class="card p-4">
-      <p class="text-xs text-content-secondary">启用</p>
-      <p class="mt-1 text-xl font-semibold tabular text-success">{{ active_count }}</p>
-    </div>
-    <div class="card p-4">
-      <p class="text-xs text-content-secondary">待激活</p>
-      <p class="mt-1 text-xl font-semibold tabular text-warning">{{ pending_count }}</p>
-    </div>
-    <div class="card p-4">
-      <p class="text-xs text-content-secondary">停用</p>
-      <p class="mt-1 text-xl font-semibold tabular text-content-muted">{{ inactive_count }}</p>
-    </div>
-  </div>
+  {# ==================== 数据表 ==================== #}
+  <div class="card overflow-hidden">
 
-  {# 搜索栏 #}
-  <div class="card p-4">
-    <div class="flex flex-wrap items-center gap-3">
-      <div class="min-w-64 flex-1">
+    {# 工具条：搜索 + 状态筛选 #}
+    <div class="flex flex-wrap items-center gap-3 border-b border-border px-5 py-3.5">
+      <div class="min-w-56 flex-1 sm:max-w-xs">
         {{ input.render(
           name="search",
           placeholder="搜索姓名或邮箱…",
           size="md",
-          prefix='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>',
+          prefix='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7.5"/><path d="m20 20-3.5-3.5"/></svg>',
           attrs='x-model="keyword" @input="onSearch()"'
         ) }}
       </div>
-      <span class="text-sm text-content-secondary">
-        共 <span class="tabular font-medium text-content" x-text="filtered.length"></span> 条结果
-      </span>
+
+      <div class="ml-auto">
+        {{ nav.tabs(
+          name="statusFilter",
+          items=[
+            {"id": "all", "label": "全部", "badge": total},
+            {"id": "active", "label": "启用", "badge": active_count},
+            {"id": "pending", "label": "待激活", "badge": pending_count},
+            {"id": "inactive", "label": "停用", "badge": inactive_count}
+          ]
+        ) }}
+      </div>
     </div>
-  </div>
 
-  {# 错误提示 #}
-  <div x-show="error" x-cloak>
-    {% call display.alert(title="操作失败", variant="danger", dismissible=true) %}
-      <span x-text="error"></span>
-    {% endcall %}
-  </div>
+    {# 错误提示 #}
+    <div x-show="error" x-cloak class="border-b border-border px-5 py-3">
+      {% call display.alert(title="操作失败", variant="danger", dismissible=true) %}
+        <span x-text="error"></span>
+      {% endcall %}
+    </div>
 
-  {# 用户表格 #}
-  <div class="overflow-hidden rounded-lg border border-border bg-surface">
     <div class="overflow-x-auto">
       <table class="table-base">
         <thead>
           <tr>
             <th class="w-12">
-              <input type="checkbox" class="h-4 w-4 rounded-sm border-border-strong text-primary focus:ring-2 focus:ring-primary" aria-label="全选">
+              <input type="checkbox" class="h-4 w-4 rounded border-border-strong text-primary focus:ring-2 focus:ring-primary" aria-label="全选">
             </th>
             <th>用户</th>
             <th>角色</th>
@@ -86,7 +84,7 @@
           <template x-if="loading">
             <tr>
               <td colspan="6">
-                <div class="py-8">{{ display.skeleton(variant="table", lines=5) }}</div>
+                <div class="p-5">{{ display.skeleton(variant="table", lines=5) }}</div>
               </td>
             </tr>
           </template>
@@ -95,7 +93,7 @@
           <template x-if="!loading && filtered.length === 0">
             <tr>
               <td colspan="6">
-                {{ display.empty(title="没有找到用户", description="试试调整搜索关键词，或新建一个用户。") }}
+                {{ display.empty(title="没有找到用户", description="试试调整搜索关键词或状态筛选，也可以新建一个用户。") }}
               </td>
             </tr>
           </template>
@@ -104,12 +102,17 @@
           <template x-for="user in paged" :key="user.id">
             <tr>
               <td>
-                <input type="checkbox" class="h-4 w-4 rounded-sm border-border-strong text-primary focus:ring-2 focus:ring-primary" aria-label="选择行">
+                <input type="checkbox" class="h-4 w-4 rounded border-border-strong text-primary focus:ring-2 focus:ring-primary" aria-label="选择行">
               </td>
               <td>
                 <div class="flex items-center gap-3">
-                  <span class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-subtle text-xs font-medium text-primary"
-                        x-text="user.name.charAt(0)"></span>
+                  <span class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold ring-1 ring-inset ring-black/[0.04]"
+                        :class="{
+                          'bg-stat-purple-bg text-stat-purple-fg': user.role === 'admin',
+                          'bg-stat-blue-bg text-stat-blue-fg': user.role === 'editor',
+                          'bg-surface-active text-content-secondary': user.role === 'viewer'
+                        }"
+                        x-text="user.initial"></span>
                   <div class="min-w-0">
                     <p class="truncate font-medium text-content" x-text="user.name"></p>
                     <p class="truncate text-xs text-content-muted" x-text="user.email"></p>
@@ -117,35 +120,37 @@
                 </div>
               </td>
               <td>
-                <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium"
+                <span class="inline-flex items-center rounded-full px-2 py-0.5 text-2xs font-semibold"
                       :class="{
-                        'bg-primary-subtle text-primary': user.role === 'admin',
+                        'bg-stat-purple-bg text-stat-purple-fg': user.role === 'admin',
                         'bg-info-subtle text-info': user.role === 'editor',
-                        'bg-surface-hover text-content-secondary': user.role === 'viewer'
+                        'bg-surface-active text-content-secondary': user.role === 'viewer'
                       }"
-                      x-text="user.role === 'admin' ? '管理员' : user.role === 'editor' ? '编辑' : '访客'"></span>
+                      x-text="user.role_label"></span>
               </td>
               <td>
-                <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium"
-                      :class="{
-                        'bg-success-subtle text-success': user.status === 'active',
-                        'bg-warning-subtle text-warning': user.status === 'pending',
-                        'bg-surface-hover text-content-secondary': user.status === 'inactive'
-                      }"
-                      x-text="user.status === 'active' ? '启用' : user.status === 'pending' ? '待激活' : '停用'"></span>
+                <span class="inline-flex items-center gap-1.5 text-xs text-content-secondary">
+                  <span class="h-1.5 w-1.5 rounded-full"
+                        :class="{
+                          'bg-success': user.status === 'active',
+                          'bg-warning': user.status === 'pending',
+                          'bg-content-muted': user.status === 'inactive'
+                        }"></span>
+                  <span x-text="user.status_label"></span>
+                </span>
               </td>
               <td class="tabular text-content-secondary" x-text="user.created_at"></td>
               <td class="text-right">
-                <div class="inline-flex items-center gap-1">
+                <div class="inline-flex items-center gap-0.5">
                   <button type="button"
-                          class="inline-flex h-8 w-8 items-center justify-center rounded-md text-content-secondary transition-colors duration-fast hover:bg-surface-hover hover:text-content focus-ring"
+                          class="inline-flex h-8 w-8 items-center justify-center rounded-md text-content-muted transition-colors duration-fast hover:bg-surface-hover hover:text-content focus-ring"
                           aria-label="编辑">
-                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                   </button>
                   <button type="button" @click="remove(user)"
-                          class="inline-flex h-8 w-8 items-center justify-center rounded-md text-content-secondary transition-colors duration-fast hover:bg-danger-subtle hover:text-danger focus-ring"
+                          class="inline-flex h-8 w-8 items-center justify-center rounded-md text-content-muted transition-colors duration-fast hover:bg-danger-subtle hover:text-danger focus-ring"
                           aria-label="删除">
-                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                   </button>
                 </div>
               </td>
@@ -155,57 +160,59 @@
       </table>
     </div>
 
-    {# 分页（客户端分页，与搜索联动） #}
-    <div class="border-t border-border px-4 py-3">
+    {# 分页（客户端分页，与搜索、筛选联动） #}
+    <div class="border-t border-border px-5 py-3.5">
       <div class="flex flex-col items-center justify-between gap-4 sm:flex-row">
-        <p class="text-sm text-content-secondary">
-          共 <span class="tabular font-medium text-content" x-text="filtered.length"></span> 条，
-          第 <span class="tabular font-medium text-content" x-text="page"></span> /
+        <p class="text-sm text-content-muted">
+          共 <span class="tabular font-medium text-content" x-text="filtered.length"></span> 条 · 第
+          <span class="tabular font-medium text-content" x-text="page"></span> /
           <span class="tabular" x-text="totalPages"></span> 页
         </p>
 
         <nav class="flex items-center gap-1" aria-label="分页">
           {# 上一页 #}
           <button type="button" @click="goTo(page - 1)" :disabled="page <= 1"
-                  class="inline-flex h-8 items-center rounded-md border border-border px-2.5 text-sm text-content-secondary transition-colors duration-fast hover:bg-surface-hover disabled:cursor-not-allowed disabled:opacity-50"
+                  class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border text-content-secondary transition-colors duration-fast hover:bg-surface-hover hover:text-content disabled:cursor-not-allowed disabled:opacity-45"
                   aria-label="上一页">
-            <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clip-rule="evenodd"/></svg>
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
           </button>
 
           {# 页码 #}
           <template x-for="p in pageNumbers" :key="p">
             <button type="button" @click="goTo(p)"
-                    class="inline-flex h-8 min-w-8 items-center justify-center rounded-md border px-2 text-sm transition-colors duration-fast"
+                    class="inline-flex h-8 min-w-8 items-center justify-center rounded-md border px-2 text-sm tabular transition-colors duration-fast"
                     :class="p === page
-                      ? 'border-primary bg-primary font-medium text-primary-fg'
-                      : 'border-border text-content-secondary hover:bg-surface-hover'"
+                      ? 'border-primary bg-primary font-medium text-primary-fg shadow-xs'
+                      : 'border-border text-content-secondary hover:bg-surface-hover hover:text-content'"
                     :aria-current="p === page ? 'page' : null"
                     x-text="p"></button>
           </template>
 
           {# 下一页 #}
           <button type="button" @click="goTo(page + 1)" :disabled="page >= totalPages"
-                  class="inline-flex h-8 items-center rounded-md border border-border px-2.5 text-sm text-content-secondary transition-colors duration-fast hover:bg-surface-hover disabled:cursor-not-allowed disabled:opacity-50"
+                  class="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border text-content-secondary transition-colors duration-fast hover:bg-surface-hover hover:text-content disabled:cursor-not-allowed disabled:opacity-45"
                   aria-label="下一页">
-            <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd"/></svg>
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
           </button>
         </nav>
       </div>
     </div>
   </div>
 
-  {# 新建用户弹窗 #}
+  {# ==================== 新建用户弹窗 ==================== #}
   {% call feedback.with_footer(
     id="createUser",
     title="新建用户",
     size="md",
-    footer=button.render(label="取消", variant="outline", attrs='@click="openModal = null"') ~ button.render(label="创建", variant="primary", attrs='@click="create()" :disabled="submitting"')  ) %}
+    footer=button.render(label="取消", variant="outline", attrs='@click="openModal = null"')
+      ~ button.render(label="创建用户", variant="primary", attrs='@click="create()" :disabled="submitting"')) %}
     <div class="space-y-4">
       {{ input.render(name="new_name", label="姓名", placeholder="请输入姓名", required=true, attrs='x-model="form.name"') }}
-      {{ input.render(name="new_email", label="邮箱", type="email", placeholder="name@example.com", required=true, attrs='x-model="form.email"') }}
+      {{ input.render(name="new_email", label="邮箱", type="email", placeholder="name@example.com", required=true, hint="用于登录与接收系统通知", attrs='x-model="form.email"') }}
       {{ input.select(
         name="new_role",
         label="角色",
+        hint="角色决定该用户可访问的功能范围",
         attrs='x-model="form.role"',
         options=[
           {"value": "viewer", "label": "访客"},
@@ -215,5 +222,6 @@
       ) }}
     </div>
   {% endcall %}
+
 </div>
 {% endblock %}

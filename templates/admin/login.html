@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-theme="light" x-data="adminLayout()" x-init="init()">
+<html lang="zh-CN" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -23,77 +23,138 @@
   <script defer src="{{ asset('js/app.js') | safe }}"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
-<body class="min-h-screen bg-bg text-content">
-  <div class="flex min-h-screen items-center justify-center px-4 py-12">
-    <div class="w-full max-w-sm">
-      {# Logo #}
-      <div class="mb-8 flex flex-col items-center">
-        <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-fg shadow-md">
-          <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+<body class="min-h-screen bg-surface text-content">
+
+  <div class="grid min-h-screen lg:grid-cols-[1.1fr_1fr]">
+
+    {# ==================== 品牌区（窄屏隐藏） ==================== #}
+    <aside class="relative hidden overflow-hidden bg-[#111228] lg:flex lg:flex-col lg:justify-between lg:p-12">
+      {# 背景光晕：两团低饱和渐变，避免大面积纯色 #}
+      <div class="pointer-events-none absolute -left-24 -top-24 h-[420px] w-[420px] rounded-full bg-primary opacity-[0.28] blur-[120px]" aria-hidden="true"></div>
+      <div class="pointer-events-none absolute -bottom-32 right-0 h-[380px] w-[380px] rounded-full bg-info opacity-[0.20] blur-[120px]" aria-hidden="true"></div>
+      {# 细网格纹理，增加材质感 #}
+      <div class="pointer-events-none absolute inset-0 opacity-[0.05]"
+           style="background-image: linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px); background-size: 44px 44px;"
+           aria-hidden="true"></div>
+
+      {# 品牌 #}
+      <div class="relative flex items-center gap-3">
+        <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10 ring-1 ring-inset ring-white/15" aria-hidden="true">
+          <svg class="h-5 w-5 text-white" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2.2 21.6 21.4h-4.3l-1.7-3.4H8.4l-1.7 3.4H2.4L12 2.2Zm0 6.3-2.1 4.4h4.2L12 8.5Z"/>
           </svg>
-        </div>
-        <h1 class="text-xl font-semibold tracking-tight text-content">欢迎回来</h1>
-        <p class="mt-1 text-sm text-content-secondary">登录以继续访问 Ada Admin</p>
+        </span>
+        <span class="text-base font-semibold tracking-tight text-white">Ada 管理平台</span>
       </div>
 
-      {# 登录表单 #}
-      <div class="card p-6" x-data="loginForm()">
-        <form class="space-y-5" @submit.prevent="submit()">
+      {# 主张 #}
+      <div class="relative max-w-md">
+        <h1 class="text-3xl font-semibold leading-tight tracking-tight text-white">
+          统一的运营数据<br>与用户管理后台
+        </h1>
+        <p class="mt-4 text-sm leading-6 text-white/60">
+          服务端渲染首屏、增量更新交互。所有指标、权限与操作记录集中在同一处，
+          让团队每天少切换三个系统。
+        </p>
+
+        <dl class="mt-10 grid grid-cols-3 gap-6 border-t border-white/10 pt-6">
+          <div>
+            <dt class="text-2xs uppercase tracking-wider text-white/40">日活设备</dt>
+            <dd class="mt-1 tabular text-xl font-semibold text-white">12.4k</dd>
+          </div>
+          <div>
+            <dt class="text-2xs uppercase tracking-wider text-white/40">首屏耗时</dt>
+            <dd class="mt-1 tabular text-xl font-semibold text-white">180ms</dd>
+          </div>
+          <div>
+            <dt class="text-2xs uppercase tracking-wider text-white/40">可用性</dt>
+            <dd class="mt-1 tabular text-xl font-semibold text-white">99.98%</dd>
+          </div>
+        </dl>
+      </div>
+
+      <p class="relative text-2xs text-white/35">
+        © 2026 Ada Framework · 内部系统，请勿外传
+      </p>
+    </aside>
+
+    {# ==================== 表单区 ==================== #}
+    <main class="flex items-center justify-center px-5 py-10 sm:px-8">
+      <div class="w-full max-w-sm" x-data="loginForm()">
+
+        {# 窄屏下的品牌行 #}
+        <div class="mb-8 flex items-center gap-2.5 lg:hidden">
+          <span class="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-fg" aria-hidden="true">
+            <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2.2 21.6 21.4h-4.3l-1.7-3.4H8.4l-1.7 3.4H2.4L12 2.2Zm0 6.3-2.1 4.4h4.2L12 8.5Z"/>
+            </svg>
+          </span>
+          <span class="text-base font-semibold tracking-tight">Ada 管理平台</span>
+        </div>
+
+        <h2 class="text-2xl font-semibold tracking-tight text-content">登录账号</h2>
+        <p class="mt-1.5 text-sm text-content-muted">使用你的工作邮箱继续访问管理后台。</p>
+
+        <form class="mt-8 space-y-5" @submit.prevent="submit()">
           <div class="space-y-1.5">
-            <label for="login-email" class="block text-sm font-medium text-content">邮箱</label>
+            <label for="login-email" class="block text-sm font-medium leading-5 text-content">邮箱</label>
             <input id="login-email" name="email" type="email" required
-                   x-model="email"
+                   x-model="email" autocomplete="username"
                    placeholder="name@example.com"
                    class="field-base h-10 text-sm">
           </div>
 
           <div class="space-y-1.5">
-            <div class="flex items-center justify-between">
-              <label for="login-password" class="block text-sm font-medium text-content">密码</label>
-              <a href="#" class="text-xs text-primary transition-colors duration-fast hover:text-primary-hover">忘记密码？</a>
+            <div class="flex items-center justify-between gap-3">
+              <label for="login-password" class="block text-sm font-medium leading-5 text-content">密码</label>
+              <a href="#" class="rounded text-xs font-medium text-primary transition-colors duration-fast hover:text-primary-hover focus-ring">忘记密码？</a>
             </div>
             <input id="login-password" name="password" type="password" required
-                   x-model="password"
+                   x-model="password" autocomplete="current-password"
                    placeholder="请输入密码"
                    class="field-base h-10 text-sm">
           </div>
 
           {# 错误提示 #}
-          <p x-show="error" x-cloak class="text-sm text-danger" role="alert" x-text="error"></p>
+          <div x-show="error" x-cloak
+               class="flex items-start gap-2 rounded-lg border border-danger-muted bg-danger-subtle px-3 py-2.5"
+               role="alert">
+            <svg class="mt-0.5 h-4 w-4 shrink-0 text-danger" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/>
+            </svg>
+            <p class="text-sm text-danger" x-text="error"></p>
+          </div>
 
-          <label class="flex items-center gap-2">
-            <input type="checkbox" name="remember"
-                   class="h-4 w-4 rounded-sm border-border-strong text-primary focus:ring-2 focus:ring-primary">
-            <span class="text-sm text-content-secondary">记住���</span>
-          </label>
+          <div class="flex items-center justify-between gap-3">
+            <label class="flex items-center gap-2">
+              <input type="checkbox" name="remember"
+                     class="h-4 w-4 rounded border-border-strong text-primary transition-colors duration-fast focus:ring-2 focus:ring-primary">
+              <span class="text-sm text-content-secondary">保持登录状态</span>
+            </label>
+          </div>
 
           <button type="submit" :disabled="submitting"
-                  class="inline-flex h-10 w-full items-center justify-center rounded-md bg-primary text-sm font-medium text-primary-fg shadow-xs transition-colors duration-base hover:bg-primary-hover focus-ring disabled:cursor-not-allowed disabled:opacity-50">
-            <span x-show="!submitting">登录</span>
-            <span x-show="submitting" x-cloak>登录中…</span>
+                  class="inline-flex h-10 w-full items-center justify-center gap-2 rounded-md bg-primary text-sm font-medium text-primary-fg shadow-xs transition-colors duration-base hover:bg-primary-hover focus-ring disabled:pointer-events-none disabled:opacity-50">
+            <svg x-show="submitting" x-cloak class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+            </svg>
+            <span x-text="submitting ? '登录中…' : '登录'"></span>
           </button>
         </form>
 
-        <div class="mt-6 border-t border-border pt-5 text-center">
-          <p class="text-sm text-content-secondary">
-            还没有账号？
-            <a href="#" class="font-medium text-primary transition-colors duration-fast hover:text-primary-hover">立即注册</a>
-          </p>
-        </div>
-      </div>
+        <p class="mt-6 text-center text-sm text-content-muted">
+          还没有账号？
+          <a href="#" class="font-medium text-primary transition-colors duration-fast hover:text-primary-hover focus-ring rounded">联系管理员开通</a>
+        </p>
 
-      {# 演示提示 #}
-      <div class="mt-6 rounded-lg border border-info-muted bg-info-subtle p-3">
-        <p class="text-center text-xs text-info">
-          演示环境：任意合法邮箱 + 密码（≥ 6 位）即可登录
+        {# 演示环境说明：与业务无关，弱化呈现 #}
+        <p class="mt-8 rounded-lg border border-border bg-surface-inset px-3 py-2.5 text-center text-2xs leading-5 text-content-muted">
+          演示环境 · 任意合法邮箱 + 不少于 6 位的密码即可登录
         </p>
       </div>
-
-      <p class="mt-8 text-center text-xs text-content-muted">
-        Powered by Rust · Minijinja · Tailwind CSS · Alpine.js
-      </p>
-    </div>
+    </main>
   </div>
 
   {# 全局轻提示容器 #}

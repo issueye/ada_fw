@@ -58,7 +58,13 @@ pub const BUILTIN_COMPONENTS: &[ComponentMeta] = &[
         name: "navigation",
         path: "components/navigation.html",
         category: "导航",
-        description: "面包屑、标签页、分页、下拉菜单、侧边栏菜单",
+        description: "面包屑、视图切换、分页、下拉菜单、分组侧边栏、快捷导航面板",
+    },
+    ComponentMeta {
+        name: "page",
+        path: "components/page.html",
+        category: "导航",
+        description: "页面头与区块标题，统一各页的标题区结构",
     },
     // ---- 反馈组件 ----
     ComponentMeta {
@@ -73,6 +79,12 @@ pub const BUILTIN_COMPONENTS: &[ComponentMeta] = &[
         path: "components/data.html",
         category: "数据",
         description: "数据表格、表单容器、指标卡、指标卡组",
+    },
+    ComponentMeta {
+        name: "chart",
+        path: "components/chart.html",
+        category: "数据",
+        description: "面积折线图、迷你趋势线、横向条形排行（纯 SVG，无第三方依赖）",
     },
     // ---- 业务组件 ----
     ComponentMeta {

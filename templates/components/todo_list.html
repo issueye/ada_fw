@@ -1,35 +1,35 @@
 {# 待办列表组件：SSR 渲染初始数据，Alpine 接管后续交互 #}
+{# 说明：init() 由 Alpine 自动调用，不要再加 x-init="init()" #}
 {% macro render(todos) %}
-<div x-data="todoApp()" x-init="init()" class="space-y-4">
+<div x-data="todoApp()" class="space-y-4">
   {# 新增表单 #}
   <form @submit.prevent="add()" class="flex gap-2">
     <input type="text" x-model="draft" placeholder="添加一条待办…"
-           class="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm
-                  focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100">
+           aria-label="新待办内容"
+           class="field-base h-10 flex-1 text-sm">
     <button type="submit"
-            class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white
-                   transition hover:bg-indigo-700 disabled:opacity-50"
+            class="inline-flex h-10 shrink-0 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-fg shadow-xs transition-colors duration-base hover:bg-primary-hover focus-ring disabled:pointer-events-none disabled:opacity-45"
             :disabled="!draft.trim()">
       添加
     </button>
   </form>
 
   {# 错误提示 #}
-  <p x-show="error" x-text="error" x-cloak class="text-sm text-red-600"></p>
+  <p x-show="error" x-text="error" x-cloak class="text-sm text-danger" role="alert"></p>
 
   {# 列表：SSR 首屏 + Alpine 接管 #}
-  <ul class="divide-y divide-slate-100 rounded-lg border border-slate-200 bg-white">
+  <ul class="divide-y divide-border overflow-hidden rounded-lg border border-border bg-surface">
     <template x-for="todo in todos" :key="todo.id">
-      <li class="flex items-center gap-3 px-4 py-3">
+      <li class="flex items-center gap-3 px-4 py-3 transition-colors duration-fast hover:bg-surface-hover">
         <input type="checkbox" :checked="todo.done" @change="toggle(todo)"
-               class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
-        <span class="flex-1 text-sm" :class="todo.done && 'line-through text-slate-400'"
+               class="h-4 w-4 rounded border-border-strong text-primary transition-colors duration-fast focus:ring-2 focus:ring-primary">
+        <span class="flex-1 text-sm text-content" :class="todo.done && 'line-through text-content-muted'"
               x-text="todo.title"></span>
-        <button @click="remove(todo)"
-                class="text-sm text-slate-400 transition hover:text-red-600">删除</button>
+        <button type="button" @click="remove(todo)"
+                class="rounded px-1.5 py-0.5 text-xs text-content-muted transition-colors duration-fast hover:bg-danger-subtle hover:text-danger focus-ring">删除</button>
       </li>
     </template>
-    <li x-show="todos.length === 0" x-cloak class="px-4 py-6 text-center text-sm text-slate-400">
+    <li x-show="todos.length === 0" x-cloak class="px-4 py-8 text-center text-sm text-content-muted">
       暂无待办，添加一条试试吧
     </li>
   </ul>

@@ -1,19 +1,40 @@
-{# 顶部导航组件 #}
+{# 顶部导航组件（站内公开页） #}
 {% macro render(items, active) %}
-<header class="border-b border-slate-200 bg-white/80 backdrop-blur sticky top-0 z-10">
-  <nav class="mx-auto flex max-w-4xl items-center gap-6 px-4 py-3">
-    <a href="/" class="text-lg font-semibold tracking-tight text-indigo-600">Ada</a>
+<header class="sticky top-0 z-20 border-b border-border bg-surface">
+  <nav class="mx-auto flex w-full max-w-3xl items-center gap-6 px-4 py-3.5 sm:px-6">
+    {# 品牌 #}
+    <a href="/" class="flex items-center gap-2 focus-ring rounded-md">
+      <span class="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-fg" aria-hidden="true">
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2.2 21.6 21.4h-4.3l-1.7-3.4H8.4l-1.7 3.4H2.4L12 2.2Zm0 6.3-2.1 4.4h4.2L12 8.5Z"/>
+        </svg>
+      </span>
+      <span class="text-[15px] font-semibold tracking-tight text-content">Ada</span>
+    </a>
+
+    {# 导航项 #}
     <ul class="flex items-center gap-1">
       {% for item in items %}
       <li>
         <a href="{{ item.href | safe }}"
-           class="rounded-md px-3 py-1.5 text-sm transition
-                  {% if item.href == active %}bg-indigo-50 text-indigo-700 font-medium{% else %}text-slate-600 hover:bg-slate-100{% endif %}">
+           class="inline-flex h-8 items-center rounded-md px-3 text-sm transition-colors duration-base focus-ring
+                  {% if item.href == active %}bg-primary-subtle font-medium text-primary{% else %}text-content-secondary hover:bg-surface-hover hover:text-content{% endif %}"
+           {% if item.href == active %}aria-current="page"{% endif %}>
           {{ item.label }}
         </a>
       </li>
       {% endfor %}
     </ul>
+
+    {# 进入后台 #}
+    <a href="/admin"
+       class="ml-auto inline-flex h-8 items-center gap-1.5 rounded-md border border-border-strong bg-surface px-3 text-sm font-medium text-content shadow-xs transition-colors duration-base hover:bg-surface-hover focus-ring">
+      管理后台
+      <svg class="h-3.5 w-3.5 text-content-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="m9 6 6 6-6 6"/>
+      </svg>
+    </a>
   </nav>
 </header>
 {% endmacro %}

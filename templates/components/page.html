@@ -1,0 +1,35 @@
+{# ==========================================================================
+   PageHeader · 页面头
+   统一后台各页的标题区：标题 + 说明 + 右侧操作。
+   用法：
+     {% import "components/page.html" as page %}
+     {{ page.header(title="用户管理", description="…", actions=button_html) }}
+   ========================================================================== #}
+{% macro header(title="", description="", actions="", meta="") %}
+<div class="flex flex-wrap items-start justify-between gap-4">
+  <div class="min-w-0">
+    <h1 class="text-xl font-semibold tracking-tight text-content">{{ title }}</h1>
+    {% if description %}
+    <p class="mt-1 max-w-2xl text-sm text-content-muted">{{ description }}</p>
+    {% endif %}
+    {% if meta %}<div class="mt-2">{{ meta | safe }}</div>{% endif %}
+  </div>
+  {% if actions %}
+  <div class="flex shrink-0 flex-wrap items-center gap-2">{{ actions | safe }}</div>
+  {% endif %}
+</div>
+{% endmacro %}
+
+
+{# ==========================================================================
+   SectionTitle · 区块小标题（卡片组之上的分组说明）
+   ========================================================================== #}
+{% macro section(title="", description="", actions="") %}
+<div class="flex flex-wrap items-end justify-between gap-3">
+  <div class="min-w-0">
+    <h2 class="text-sm font-semibold text-content">{{ title }}</h2>
+    {% if description %}<p class="mt-0.5 text-xs text-content-muted">{{ description }}</p>{% endif %}
+  </div>
+  {% if actions %}<div class="flex shrink-0 items-center gap-2">{{ actions | safe }}</div>{% endif %}
+</div>
+{% endmacro %}

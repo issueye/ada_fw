@@ -15,19 +15,27 @@
 /* ---- 基础样式（CDN 模式下 Tailwind preflight 之外的补充） ---- */
 [x-cloak] { display: none !important; }
 
-::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--color-border-strong); border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: var(--color-text-muted); }
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-strong);
+  border: 3px solid transparent;
+  background-clip: content-box;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--color-text-muted); background-clip: content-box; }
 
-/* ---- 动画 ---- */
+/* ---- 动画 ----
+   说明：CDN 模式不解析 tailwind.config.js 的 keyframes，
+   因此动画类必须在此内联，与 tailwind.config.js 保持一致。 */
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
-@keyframes scale-in { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+@keyframes scale-in { from { opacity: 0; transform: scale(0.96) translateY(4px); } to { opacity: 1; transform: scale(1) translateY(0); } }
 @keyframes slide-in-right { from { transform: translateX(100%); } to { transform: translateX(0); } }
 @keyframes slide-in-left { from { transform: translateX(-100%); } to { transform: translateX(0); } }
 @keyframes slide-in-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
 @keyframes slide-in-down { from { transform: translateY(-100%); } to { transform: translateY(0); } }
-@keyframes toast-in { from { opacity: 0; transform: translateY(-8px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes toast-in { from { opacity: 0; transform: translateY(-10px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes draw-in { from { stroke-dashoffset: 1000; } to { stroke-dashoffset: 0; } }
 
 .animate-fade-in { animation: fade-in var(--duration-base) var(--ease-out); }
 .animate-scale-in { animation: scale-in var(--duration-base) var(--ease-out); }
@@ -36,5 +44,6 @@
 .animate-slide-in-up { animation: slide-in-up var(--duration-slow) var(--ease-out); }
 .animate-slide-in-down { animation: slide-in-down var(--duration-slow) var(--ease-out); }
 .animate-toast-in { animation: toast-in var(--duration-base) var(--ease-out); }
+.animate-draw-in { animation: draw-in 1s var(--ease-out) both; }
 </style>
 {% endif %}

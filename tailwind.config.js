@@ -44,14 +44,15 @@ module.exports = {
           DEFAULT: 'var(--color-info)',
           fg: 'var(--color-info-fg)',
         },
-        // ---- 顶栏（深蓝铺满） ----
+        // ---- 外壳：顶栏（中性白） ----
         topbar: {
           DEFAULT: 'var(--color-topbar-bg)',
           fg: 'var(--color-topbar-fg)',
+          muted: 'var(--color-topbar-muted)',
           hover: 'var(--color-topbar-hover)',
           active: 'var(--color-topbar-active)',
         },
-        // ---- 统计卡浅色底 ----
+        // ---- 数据可视化色（图表 / 图标底 / 日历事件） ----
         stat: {
           'blue-bg': 'var(--color-stat-blue-bg)',
           'blue-fg': 'var(--color-stat-blue-fg)',
@@ -70,6 +71,7 @@ module.exports = {
           DEFAULT: 'var(--color-surface)',
           hover: 'var(--color-surface-hover)',
           active: 'var(--color-surface-active)',
+          inset: 'var(--color-surface-inset)',
         },
         border: {
           DEFAULT: 'var(--color-border)',
@@ -87,6 +89,7 @@ module.exports = {
         md: 'var(--radius-md)',
         lg: 'var(--radius-lg)',
         xl: 'var(--radius-xl)',
+        full: 'var(--radius-full)',
       },
       boxShadow: {
         xs: 'var(--shadow-xs)',
@@ -104,27 +107,22 @@ module.exports = {
         out: 'var(--ease-out)',
         in: 'var(--ease-in)',
         'in-out': 'var(--ease-in-out)',
+        spring: 'var(--ease-spring)',
       },
       spacing: {
         sidebar: 'var(--sidebar-width)',
         'sidebar-collapsed': 'var(--sidebar-width-collapsed)',
         topbar: 'var(--topbar-height)',
         tabbar: 'var(--tabbar-height)',
+        content: 'var(--content-max-width)',
       },
       fontFamily: {
-        sans: [
-          '-apple-system',
-          'BlinkMacSystemFont',
-          'Segoe UI',
-          'PingFang SC',
-          'Hiragino Sans GB',
-          'Microsoft YaHei',
-          'Helvetica Neue',
-          'Helvetica',
-          'Arial',
-          'sans-serif',
-        ],
-        mono: ['JetBrains Mono', 'SFMono-Regular', 'Consolas', 'monospace'],
+        sans: ['var(--font-sans)'],
+        mono: ['var(--font-mono)'],
+      },
+      fontSize: {
+        // 后台专用小号字：11/16 用于大写标签，12/16 用于辅助信息
+        '2xs': ['11px', { lineHeight: '16px' }],
       },
       keyframes: {
         'fade-in': {
@@ -132,8 +130,8 @@ module.exports = {
           to: { opacity: '1' },
         },
         'scale-in': {
-          from: { opacity: '0', transform: 'scale(0.95)' },
-          to: { opacity: '1', transform: 'scale(1)' },
+          from: { opacity: '0', transform: 'scale(0.96) translateY(4px)' },
+          to: { opacity: '1', transform: 'scale(1) translateY(0)' },
         },
         'slide-in-right': {
           from: { transform: 'translateX(100%)' },
@@ -152,11 +150,15 @@ module.exports = {
           to: { transform: 'translateY(0)' },
         },
         'toast-in': {
-          from: { opacity: '0', transform: 'translateY(-8px) scale(0.98)' },
+          from: { opacity: '0', transform: 'translateY(-10px) scale(0.98)' },
           to: { opacity: '1', transform: 'translateY(0) scale(1)' },
         },
         shimmer: {
           '100%': { transform: 'translateX(100%)' },
+        },
+        'draw-in': {
+          from: { 'stroke-dashoffset': '1000' },
+          to: { 'stroke-dashoffset': '0' },
         },
       },
       animation: {
@@ -167,7 +169,8 @@ module.exports = {
         'slide-in-up': 'slide-in-up var(--duration-slow) var(--ease-out)',
         'slide-in-down': 'slide-in-down var(--duration-slow) var(--ease-out)',
         'toast-in': 'toast-in var(--duration-base) var(--ease-out)',
-        shimmer: 'shimmer 1.5s infinite',
+        shimmer: 'shimmer 1.4s infinite',
+        'draw-in': 'draw-in 1s var(--ease-out) both',
       },
     },
   },

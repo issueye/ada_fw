@@ -26,14 +26,18 @@ fn render_tokens() -> String {
 #[test]
 fn cdn_模式应内联设计令牌() {
     let html = render_tokens();
-    // 新版亮蓝主色
-    assert!(html.contains("--color-primary: #1677ff"), "应包含新版主色");
-    // 顶栏令牌
+    // 新版靛蓝主色
+    assert!(html.contains("--color-primary: #5b5bd6"), "应包含新版主色");
+    // 外壳令牌
     assert!(html.contains("--color-topbar-bg"), "应包含顶栏令牌");
-    // 统计卡令牌
-    assert!(html.contains("--color-stat-blue-bg"), "应包含统计卡令牌");
+    // 数据色令牌
+    assert!(html.contains("--color-stat-blue-bg"), "应包含数据色令牌");
     // 布局令牌
-    assert!(html.contains("--tabbar-height"), "应包含页签栏高度令牌");
+    assert!(html.contains("--tabbar-height"), "应包含分段控件高度令牌");
+    assert!(html.contains("--content-max-width"), "应包含内容区最大宽度令牌");
+    // 圆角与阴影
+    assert!(html.contains("--radius-lg: 10px"), "应包含卡片圆角令牌");
+    assert!(html.contains("--shadow-md"), "应包含中号阴影令牌");
 }
 
 #[test]

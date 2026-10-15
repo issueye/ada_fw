@@ -35,17 +35,60 @@ document.addEventListener('alpine:init', () => {
   }
 
   /* ======================================================================
-     后台布局：侧边栏折叠 + 主题切换
+     后台布局：侧边栏折叠 / 移动端抽屉 / 主题切换 / 快捷导航（⌘K）
      ====================================================================== */
   Alpine.data('adminLayout', () => ({
     sidebarCollapsed: false,
+    /** 移动端（<768px）侧边栏抽屉是否展开。 */
+    mobileNav: false,
     theme: 'light',
+
+    /** 快捷导航状态。 */
+    paletteOpen: false,
+    paletteQuery: '',
+    paletteIndex: 0,
+    paletteItems: [],
 
     init() {
       // 侧边栏状态持久化
       this.sidebarCollapsed = localStorage.getItem('ada-sidebar') === 'collapsed';
       // 主题从 <html data-theme> 读取（已在 head 中初始化）
       this.theme = document.documentElement.getAttribute('data-theme') || 'light';
+      // 快捷导航数据源由布局模板以 JSON 脚本下发
+      this.paletteItems = this.readNavIndex();
+
+      this.onKeydown = (e) => {
+        // ⌘K / Ctrl+K 打开快捷导航
+        if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+          e.preventDefault();
+          this.paletteOpen ? this.closePalette() : this.openPalette();
+          return;
+        }
+        // "/" 快捷呼出（输入框内不触发）
+        if (e.key === '/' && !this.paletteOpen) {
+          const tag = (e.target?.tagName || '').toLowerCase();
+          if (tag === 'input' || tag === 'textarea' || e.target?.isContentEditable) return;
+          e.preventDefault();
+          this.openPalette();
+        }
+      };
+      window.addEventListener('keydown', this.onKeydown);
+    },
+
+    destroy() {
+      window.removeEventListener('keydown', this.onKeydown);
+    },
+
+    /** 读取布局下发的导航索引。 */
+    readNavIndex() {
+      const el = document.getElementById('ada-nav-index');
+      if (!el) return [];
+      try {
+        return JSON.parse(el.textContent) || [];
+      } catch (e) {
+        console.warn('[ada] 解析快捷导航数据失败', e);
+        return [];
+      }
     },
 
     toggleSidebar() {
@@ -67,6 +110,51 @@ document.addEventListener('alpine:init', () => {
         document.documentElement.requestFullscreen?.();
       }
     },
+
+    // ---- 快捷导航 ----
+
+    openPalette() {
+      this.paletteQuery = '';
+      this.paletteIndex = 0;
+      this.paletteOpen = true;
+      this.$nextTick(() => this.$refs.paletteInput?.focus());
+    },
+
+    closePalette() {
+      this.paletteOpen = false;
+    },
+
+    /** 过滤后的跳转目标（最多 8 条）。 */
+    get paletteResults() {
+      const q = this.paletteQuery.trim().toLowerCase();
+      if (!q) return this.paletteItems.slice(0, 8);
+      return this.paletteItems
+        .filter((i) =>
+          (i.label || '').toLowerCase().includes(q) ||
+          (i.href || '').toLowerCase().includes(q) ||
+          (i.group || '').toLowerCase().includes(q)
+        )
+        .slice(0, 8);
+    },
+
+    movePalette(delta) {
+      const total = this.paletteResults.length;
+      if (total === 0) return;
+      this.paletteIndex = (this.paletteIndex + delta + total) % total;
+    },
+
+    runPalette() {
+      const item = this.paletteResults[this.paletteIndex];
+      if (item) this.goPalette(item);
+    },
+
+    goPalette(item) {
+      this.closePalette();
+      // 已在当前页则不触发无意义的跳转
+      if (item.href && item.href !== window.location.pathname) {
+        window.location.href = item.href;
+      }
+    },
   }));
 
   /* ======================================================================
@@ -78,7 +166,7 @@ document.addEventListener('alpine:init', () => {
      ====================================================================== */
   Alpine.data('feedback', () => ({
     toasts: [],
-    confirmState: { open: false, title: '', message: '', onConfirm: null },
+    confirmState: { open: false, title: '', message: '', payload: null, onConfirm: null },
 
     /** 弹出轻提示。type: info | success | warning | danger */
     toast(title, message = '', type = 'info', duration = 3000) {
@@ -93,19 +181,23 @@ document.addEventListener('alpine:init', () => {
       this.toasts = this.toasts.filter((t) => t.id !== id);
     },
 
-    /** 弹出二次确认。确认后派发 ada-confirm-ok 事件。 */
-    confirm(title, message) {
+    /**
+     * 弹出二次确认。确认后派发 ada-confirm-ok 事件，
+     * 并把调用方随附的 payload 原样回传（用于定位待处理对象）。
+     */
+    confirm(title, message, payload = null) {
       this.confirmState = {
         open: true,
         title,
         message,
-        onConfirm: () => this.$dispatch('ada-confirm-ok'),
+        payload,
+        onConfirm: () => this.$dispatch('ada-confirm-ok', payload),
       };
     },
   }));
 
   /* ======================================================================
-     用户管理：列表 + 搜索 + 新建 + 删除
+     登录表单
      ====================================================================== */
   Alpine.data('loginForm', () => ({
     email: '',
@@ -133,9 +225,14 @@ document.addEventListener('alpine:init', () => {
     },
   }));
 
+  /* ======================================================================
+     用户管理：列表 + 搜索 + 状态筛选 + 分页 + 新建 + 删除
+     ====================================================================== */
   Alpine.data('userManager', () => ({
     users: [],
     keyword: '',
+    /** 状态筛选（分段控件）：all | active | pending | inactive */
+    statusFilter: 'all',
     loading: false,
     error: '',
     /** 当前打开的弹窗 id，null 表示全部关闭。 */
@@ -155,12 +252,14 @@ document.addEventListener('alpine:init', () => {
 
     get filtered() {
       const kw = this.keyword.trim().toLowerCase();
-      if (!kw) return this.users;
-      return this.users.filter(
-        (u) =>
+      return this.users.filter((u) => {
+        if (this.statusFilter !== 'all' && u.status !== this.statusFilter) return false;
+        if (!kw) return true;
+        return (
           u.name.toLowerCase().includes(kw) ||
           u.email.toLowerCase().includes(kw)
-      );
+        );
+      });
     },
 
     /** 总页数（至少 1 页）。 */
@@ -187,6 +286,12 @@ document.addEventListener('alpine:init', () => {
 
     /** 搜索关键词变化时回到第一页。 */
     onSearch() {
+      this.page = 1;
+    },
+
+    /** 切换状态筛选并回到第一页。 */
+    setStatusFilter(value) {
+      this.statusFilter = value;
       this.page = 1;
     },
 
@@ -238,7 +343,21 @@ document.addEventListener('alpine:init', () => {
       }
     },
 
-    async remove(user) {
+    /** 删除用户（先二次确认，确认结果经 ada-confirm-ok 回传）。 */
+    remove(user) {
+      this.$dispatch('ada-confirm', {
+        title: '删除用户',
+        message: `确认删除「${user.name}」？该操作不可撤销。`,
+        payload: user,
+      });
+    },
+
+    /** 二次确认回调：detail 即 dispatch 时随附的 payload。 */
+    onConfirmOk(payload) {
+      if (payload && payload.id) this.doRemove(payload);
+    },
+
+    async doRemove(user) {
       try {
         await apiRequest(`/api/users/${user.id}`, { method: 'DELETE' });
         this.users = this.users.filter((u) => u.id !== user.id);

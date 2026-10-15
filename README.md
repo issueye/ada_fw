@@ -10,12 +10,13 @@
 ## 特性
 
 - **SSR 优先**：首屏完整渲染，SEO 友好、加载快
-- **组件化**：28 个符合 UED 规范的组件，基于 Jinja 宏实现
+- **组件化**：10 个组件文件、6 个分类，基于 Jinja 宏实现，全部符合 UED 规范
 - **设计令牌**：语义化 CSS 变量，支持浅色/暗色双模式
 - **渐进增强**：Alpine.js 声明式交互，无需前端构建工具链
 - **数据分层**：页面走 HTML，动态数据走 `/api/*` JSON 接口
 - **Tailwind 双模式**：开发期 CDN、生产期本地构建，一键切换
-- **后台模板**：侧边栏布局 + 6 个完整页面（仪表盘/用户/表单/设置/登录/404）
+- **后台模板**：现代 SaaS 外壳 + 7 个完整页面（仪表盘/用户/表单/设置/组件库/登录/404）
+- **图表零依赖**：面积图 / 迷你趋势线 / 条形排行均为纯 SVG 实现
 - **JWT 鉴权**：HttpOnly Cookie + 无状态 Token，页面重定向 / API 401
 - **数据持久化**：可选 SQLite（sqlx），未配置时纯内存运行
 - **模板热重载**：开发模式监听 `templates/` 变更，改完即生效
@@ -85,7 +86,8 @@ ada_fw/
 ├── templates/
 │   ├── layouts/admin.html       # 后台布局（模板继承）
 │   ├── admin/                   # 后台页面
-│   ├── components/              # 组件库（7 个文件 / 28 个组件）
+│   ├── components/              # 组件库（10 个文件 / 6 个分类）
+│   ├── partials/                # 令牌与 Tailwind 配置片段（CDN 模式内联）
 │   ├── base.html                # 示例页布局
 │   └── index.html / about.html  # 示例页
 └── static/
@@ -98,17 +100,23 @@ ada_fw/
 
 ## 组件库
 
-共 **28 个组件**，分 5 类。完整预览见 `/admin/ui-kit`。
+共 **10 个组件文件 / 6 个分类**，完整预览见 `/admin/ui-kit`。
+
+设计基调：**现代 SaaS 专业中后台**——中性外壳 + 靛蓝单强调色 + 分层柔和阴影，
+详细规范见 [`docs/UED.md`](./docs/UED.md)。
 
 | 分类 | 文件 | 组件 |
 | --- | --- | --- |
-| **基础** | `button.html` | Button（5 变体 × 3 尺寸）、IconButton |
+| **基础** | `button.html` | Button（5 变体 × 3 尺寸）、IconButton、Link |
 | | `input.html` | Input、Textarea、Select |
-| | `form-controls.html` | Checkbox、Radio、Switch |
-| **展示** | `display.html` | Card、Badge、Tag、Avatar、Alert、Progress、Skeleton、Empty |
-| **导航** | `navigation.html` | Breadcrumb、Tabs、Pagination、Dropdown、Menu |
+| | `form-controls.html` | Checkbox、Radio、Switch、Segmented |
+| **展示** | `display.html` | Card、Badge、Tag、Avatar、Alert、Progress、Skeleton、Empty、StatRow |
+| **导航** | `navigation.html` | Breadcrumb、Tabs、Pagination、Dropdown、Menu、CommandPalette |
+| | `page.html` | PageHeader、SectionTitle |
 | **反馈** | `feedback.html` | Modal、Drawer、Toast、Tooltip、Confirm |
-| **数据** | `data.html` | Card、Table、Form、StatCard |
+| **数据** | `data.html` | Card、Table、Form、StatCard、StatGroup |
+| | `chart.html` | AreaChart、Sparkline、BarChart（纯 SVG，无第三方依赖） |
+| **业务** | `calendar.html` | Calendar、CalendarToolbar、NoticeBar |
 
 ### 使用方式
 
@@ -136,18 +144,33 @@ ada_fw/
 所有样式通过**语义令牌**驱动，业务代码不直接引用基础色阶。
 
 ```css
-/* 语义色 */
---color-primary / --color-primary-hover / --color-primary-active
+/* 主色（靛蓝） */
+--color-primary(#5b5bd6) / -hover / -active / -subtle / -muted / -fg / -ring
+
+/* 功能色 */
 --color-success / --color-warning / --color-danger / --color-info
+   （每个都配 -subtle 浅底 与 -muted 边框）
+
+/* 数据可视化色（指标卡图标底 / 图表系列 / 日历事件） */
+--color-stat-{blue|orange|green|purple|red}-{bg|fg}
 
 /* 中性色 */
---color-bg / --color-surface / --color-border / --color-text
---color-text-secondary / --color-text-muted
+--color-bg / --color-surface(-hover,-active,-inset)
+--color-border(-strong) / --color-text(-secondary,-muted)
 
-/* 圆角 / 动效 */
---radius-sm|md|lg|xl
+/* 圆角 / 阴影 / 动效 */
+--radius-sm|md|lg|xl|full
+--shadow-xs|sm|md|lg|xl
 --duration-fast|base|slow
+
+/* 布局 */
+--sidebar-width(232px) / --sidebar-width-collapsed(68px)
+--topbar-height(56px) / --content-max-width(1440px)
 ```
+
+> ⚠️ 令牌值是 `var(--color-*)`，**不能使用 Tailwind 的透明度修饰符**
+> （如 `bg-primary/50`）。Tailwind v3 会生成 `rgb(var(…) / .5)` 这类无效值，
+> 样式静默失效。需要降低强度时请使用 `opacity-*` 或 `color-mix()`。
 
 ### 暗色模式
 
@@ -165,26 +188,32 @@ ada_fw/
 ### 布局
 
 ```
-┌──────────────────────────────────────────────┐
-│  Sidebar (240px / 折叠 64px)  │   Topbar 56px │
-│                               ├───────────────┤
-│                               │   Content     │
-│                               │   max-w-7xl   │
-└──────────────────────────────────────────────┘
+┌────────────┬──────────────────────────────────────┐
+│ 品牌区      │  顶栏：面包屑 · ⌘K · 通知 · 主题 · 用户 │  ← 56px
+├────────────┼──────────────────────────────────────┤
+│ 侧边栏      │  内容区                               │
+│ 概览        │   ┌─ 页面头（标题 + 说明 + 操作）      │
+│ 管理        │   └─ 主体（卡片网格 / 表格）          │
+│ 系统        │                                      │
+└────────────┴──────────────────────────────────────┘
+   232px              自适应（内容最大 1440px）
 ```
 
-侧边栏可折叠（状态持久化），顶栏含面包屑、主题切换、通知、用户菜单。
+- 侧边栏全高常驻、按「概览 / 管理 / 系统」分组，可折叠（状态持久化到 `localStorage`）。
+- 顶栏只覆盖内容区，含面包屑、`⌘K` 快捷导航、设计规范入口、通知、主题切换与用户菜单。
+- 不使用浏览器式多页签栏：跨页跳转由 `⌘K` 快捷导航承担。
+- `< md` 时侧边栏变为覆盖式抽屉，顶栏出现汉堡按钮。
 
 ### 页面
 
 | 路径 | 说明 |
 | --- | --- |
-| `/admin` | 仪表盘：指标卡、最近用户、活动流 |
-| `/admin/users` | 用户管理：搜索、表格、新建弹窗、删除 |
+| `/admin` | 仪表盘：指标卡（含迷你趋势线）、营收面积图、最近用户、活动时间轴 |
+| `/admin/users` | 用户管理：账号概览、搜索 + 状态分段筛选、表格、新建弹窗、删除确认 |
 | `/admin/forms` | 表单示例：各类控件与校验状态 |
-| `/admin/settings` | 设置：标签页、主题选择、通知偏好 |
-| `/admin/ui-kit` | 组件库预览 |
-| `/admin/login` | 登录页（独立布局） |
+| `/admin/settings` | 设置：纵向分类导航、主题选择、通知偏好 |
+| `/admin/ui-kit` | 组件库预览（含语义色板、图表、日历） |
+| `/admin/login` | 登录页（左右分栏独立布局） |
 | `/admin/404` | 404 页（独立布局） |
 
 ### 新增后台页面
@@ -194,10 +223,18 @@ ada_fw/
 ```jinja
 {% extends "layouts/admin.html" %}
 {% import "components/data.html" as data %}
+{% import "components/page.html" as page %}
+{% import "components/button.html" as button %}
 
 {% block content %}
-<div class="space-y-6">
-  <h1 class="text-2xl font-semibold text-content">页面标题</h1>
+<div class="space-y-5">
+  {# 页面头统一用 page.header，保证各页标题区结构一致 #}
+  {{ page.header(
+    title="页面标题",
+    description="一句话说明这个页面能做什么。",
+    actions=button.render(label="新建", variant="primary")
+  ) }}
+
   {% call data.render(title="卡片") %}
     <p>内容</p>
   {% endcall %}
@@ -207,7 +244,10 @@ ada_fw/
 
 2. 在 `src/handlers/admin.rs` 添加上下文与处理器
 3. 在 `src/router.rs` 注册路由
-4. 在 `build_menu()` 中添加菜单项
+4. 在 `build_menu()` 中添加菜单项（记得填 `group`，否则不会分组显示）
+
+> 上下文只需下发 `title`、`breadcrumb`、`menu_items` 三项即可套用布局；
+> 菜单项会同时用于侧边栏与 `⌘K` 快捷导航。
 
 ---
 
@@ -343,8 +383,11 @@ document.addEventListener('alpine:init', () => {
 });
 ```
 
-内置组件：`adminLayout`（侧边栏 + 主题）、`feedback`（Toast + Confirm）、
-`userManager`（用户 CRUD）、`todoApp`（待办 CRUD）。
+内置组件：`adminLayout`（侧边栏 + 主题 + ⌘K 快捷导航）、`feedback`（Toast + Confirm）、
+`loginForm`（登录）、`userManager`（用户 CRUD）、`todoApp`（待办 CRUD）。
+
+> ⚠️ `Alpine.data()` 注册的组件其 `init()` 会被 Alpine 自动调用，
+> 因此**不要再写 `x-init="init()"`**，否则监听器与数据加载会执行两遍。
 
 ### SSR 数据交接
 

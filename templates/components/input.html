@@ -16,11 +16,11 @@
      attrs       - 透传属性（如 x-model、@input）
    ========================================================================== #}
 {% macro render(name, label="", type="text", value="", placeholder="", size="md", error="", hint="", required=false, disabled=false, prefix="", suffix="", attrs="") %}
-{%- set sizes = { "sm": "h-8 text-xs", "md": "h-9 text-sm", "lg": "h-11 text-base" } -%}
+{%- set sizes = { "sm": "h-8 text-xs", "md": "h-9 text-sm", "lg": "h-11 text-sm" } -%}
 {%- set has_error = error | length > 0 -%}
 <div class="space-y-1.5">
   {% if label %}
-  <label for="field-{{ name }}" class="block text-sm font-medium text-content">
+  <label for="field-{{ name }}" class="block text-sm font-medium leading-5 text-content">
     {{ label }}
     {% if required %}<span class="text-danger" aria-hidden="true">*</span>{% endif %}
   </label>
@@ -55,9 +55,10 @@
   </div>
 
   {% if has_error %}
-  <p id="error-{{ name }}" class="flex items-center gap-1 text-xs text-danger" role="alert">
-    <svg class="h-3.5 w-3.5 shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-      <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/>
+  <p id="error-{{ name }}" class="flex items-center gap-1.5 text-xs text-danger" role="alert">
+    <svg class="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/>
     </svg>
     {{ error }}
   </p>
@@ -75,7 +76,7 @@
 {%- set has_error = error | length > 0 -%}
 <div class="space-y-1.5">
   {% if label %}
-  <label for="field-{{ name }}" class="block text-sm font-medium text-content">
+  <label for="field-{{ name }}" class="block text-sm font-medium leading-5 text-content">
     {{ label }}
     {% if required %}<span class="text-danger" aria-hidden="true">*</span>{% endif %}
   </label>
@@ -88,7 +89,7 @@
             {% if required %}required{% endif %}
             {% if disabled %}disabled{% endif %}
             {% if has_error %}aria-invalid="true" aria-describedby="error-{{ name }}"{% endif %}
-            class="field-base py-2 resize-y
+            class="field-base resize-y py-2.5 leading-6
                    {% if has_error %}border-danger focus:border-danger focus:ring-danger{% endif %}"
             {{ attrs | safe }}>{{ value }}</textarea>
 
@@ -103,15 +104,14 @@
 
 {# ==========================================================================
    Select · 下拉选择
-   参数：
-     options - [{ value, label, selected }]
+   参数：options - [{ value, label, selected }]
    ========================================================================== #}
 {% macro select(name, label="", options=[], size="md", error="", hint="", required=false, disabled=false, attrs="") %}
-{%- set sizes = { "sm": "h-8 text-xs", "md": "h-9 text-sm", "lg": "h-11 text-base" } -%}
+{%- set sizes = { "sm": "h-8 text-xs", "md": "h-9 text-sm", "lg": "h-11 text-sm" } -%}
 {%- set has_error = error | length > 0 -%}
 <div class="space-y-1.5">
   {% if label %}
-  <label for="field-{{ name }}" class="block text-sm font-medium text-content">
+  <label for="field-{{ name }}" class="block text-sm font-medium leading-5 text-content">
     {{ label }}
     {% if required %}<span class="text-danger" aria-hidden="true">*</span>{% endif %}
   </label>
@@ -123,7 +123,7 @@
             {% if required %}required{% endif %}
             {% if disabled %}disabled{% endif %}
             {% if has_error %}aria-invalid="true"{% endif %}
-            class="field-base appearance-none pr-9 {{ sizes[size] | default(sizes['md']) }}
+            class="field-base cursor-pointer appearance-none pr-9 {{ sizes[size] | default(sizes['md']) }}
                    {% if has_error %}border-danger focus:border-danger focus:ring-danger{% endif %}"
             {{ attrs | safe }}>
       {% for opt in options %}
@@ -131,8 +131,8 @@
       {% endfor %}
     </select>
     <svg class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-content-muted"
-         viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-      <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
+         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="m6 9 6 6 6-6"/>
     </svg>
   </div>
 

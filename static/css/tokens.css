@@ -3,172 +3,201 @@
    语义令牌层：业务代码只使用这一层，不直接引用基础色阶。
    通过 <html data-theme="dark"> 切换暗色模式。
 
-   设计基调：企业级管理后台（Element Plus / Ant Design 调性）
-   - 主色为高饱和亮蓝，顶栏整条铺满主色
-   - 圆角克制（2-6px），阴影极弱，以边框区分层级
-   - 信息密度高，适合数据密集型场景
+   设计基调：现代 SaaS 专业中后台
+   - 中性色骨架（冷调灰），应用画布与内容面带明显层次
+   - 主色为克制的靛蓝（Iris），只用于关键操作、激活态与数据强调
+   - 外壳（顶栏/侧边栏）保持中性白，不用高饱和大色块
+   - 圆角 6-14px，阴影为分层柔和投影，边框为 1px hairline
+   - 信息密度适中，靠排版层级而非色块堆叠来区分内容
+
+   设计约束：
+   - 同一屏内主色面积不得超过 10%，避免"整屏发蓝"
+   - 数字一律使用 .tabular（等宽数字），保证纵向对齐
    ========================================================================== */
 
 :root {
-  /* ---- 主色（Bright Blue） ---- */
-  --color-primary-subtle: #e8f3ff;
-  --color-primary-muted: #a3ccff;
-  --color-primary: #1677ff;
-  --color-primary-hover: #4096ff;
-  --color-primary-active: #0958d9;
+  /* ---- 主色（Iris · 靛蓝） ---- */
+  --color-primary-subtle: #f0f0fd;
+  --color-primary-muted: #c9c9f2;
+  --color-primary: #5b5bd6;
+  --color-primary-hover: #6e6ade;
+  --color-primary-active: #4b4bc0;
   --color-primary-fg: #ffffff;
+  /* 焦点环 / 输入态投影，统一由主色派生 */
+  --color-primary-ring: rgb(91 91 214 / 0.22);
 
-  /* ---- 顶栏（深蓝，铺满主色） ---- */
-  --color-topbar-bg: #1677ff;
-  --color-topbar-fg: #ffffff;
-  --color-topbar-hover: rgb(255 255 255 / 0.16);
-  --color-topbar-active: rgb(255 255 255 / 0.24);
+  /* ---- 外壳：顶栏（中性白，1px hairline 分隔） ---- */
+  --color-topbar-bg: #ffffff;
+  --color-topbar-fg: #101322;
+  --color-topbar-muted: #6b7280;
+  --color-topbar-hover: rgb(16 19 34 / 0.05);
+  --color-topbar-active: rgb(16 19 34 / 0.09);
 
-  /* ---- 中性色 ---- */
-  --color-bg: #f0f2f5;
+  /* ---- 中性色（冷调灰骨架） ---- */
+  --color-bg: #f6f7f9;
   --color-surface: #ffffff;
-  --color-surface-hover: #f5f7fa;
-  --color-surface-active: #e8eaed;
-  --color-border: #e4e7ed;
-  --color-border-strong: #d4d7de;
-  --color-text: #1f2329;
-  --color-text-secondary: #5c6370;
-  --color-text-muted: #8f959e;
+  --color-surface-hover: #f3f4f7;
+  --color-surface-active: #e9ebf0;
+  --color-surface-inset: #f8f9fb;
+  --color-border: #e8eaef;
+  --color-border-strong: #d8dbe3;
+  --color-text: #101322;
+  --color-text-secondary: #5b6273;
+  --color-text-muted: #8b91a1;
   --color-text-inverse: #ffffff;
 
-  /* ---- 功能色 ---- */
-  --color-success-subtle: #e8f8ee;
-  --color-success-muted: #a8e0bd;
-  --color-success: #00a854;
+  /* ---- 功能色（去饱和，避免刺眼） ---- */
+  --color-success-subtle: #e9f7ef;
+  --color-success-muted: #a9e0c4;
+  --color-success: #12864f;
   --color-success-fg: #ffffff;
 
   --color-warning-subtle: #fff5e6;
-  --color-warning-muted: #ffd591;
-  --color-warning: #fa8c16;
+  --color-warning-muted: #f8d9a3;
+  --color-warning: #b3690b;
   --color-warning-fg: #ffffff;
 
-  --color-danger-subtle: #fff1f0;
-  --color-danger-muted: #ffccc7;
-  --color-danger: #f5222d;
-  --color-danger-hover: #d9363e;
+  --color-danger-subtle: #fdecea;
+  --color-danger-muted: #f7c2bd;
+  --color-danger: #d92d20;
+  --color-danger-hover: #b9251a;
   --color-danger-fg: #ffffff;
 
-  --color-info-subtle: #e6f7ff;
-  --color-info-muted: #91d5ff;
-  --color-info: #1890ff;
+  --color-info-subtle: #eaf2fe;
+  --color-info-muted: #b3cffb;
+  --color-info: #1f6feb;
   --color-info-fg: #ffffff;
 
-  /* ---- 统计卡专用浅色底（参考图 5 色并排） ---- */
-  --color-stat-blue-bg: #e8f3ff;
-  --color-stat-blue-fg: #1677ff;
-  --color-stat-orange-bg: #fff5e6;
-  --color-stat-orange-fg: #fa8c16;
-  --color-stat-green-bg: #e8f8ee;
-  --color-stat-green-fg: #00a854;
-  --color-stat-purple-bg: #f4eeff;
-  --color-stat-purple-fg: #722ed1;
-  --color-stat-red-bg: #fff1f0;
-  --color-stat-red-fg: #f5222d;
+  /* ---- 数据可视化配色（图表 / 图标底色 / 日历事件） ----
+     命名沿用 stat-*，语义为「第 N 号数据色」，与业务无关。 */
+  --color-stat-blue-bg: #eeeffe;
+  --color-stat-blue-fg: #5b5bd6;
+  --color-stat-orange-bg: #fff3e8;
+  --color-stat-orange-fg: #b3690b;
+  --color-stat-green-bg: #e9f7ef;
+  --color-stat-green-fg: #12864f;
+  --color-stat-purple-bg: #f4edfe;
+  --color-stat-purple-fg: #7b3fd4;
+  --color-stat-red-bg: #fdecea;
+  --color-stat-red-fg: #d92d20;
 
-  /* ---- 圆角（克制） ---- */
-  --radius-sm: 2px;
-  --radius-md: 4px;
-  --radius-lg: 6px;
-  --radius-xl: 8px;
+  /* ---- 圆角 ---- */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
+  --radius-full: 9999px;
 
-  /* ---- 阴影（极弱，以边框为主） ---- */
-  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.03);
-  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 2px 8px 0 rgb(0 0 0 / 0.08);
-  --shadow-lg: 0 4px 16px 0 rgb(0 0 0 / 0.10);
-  --shadow-xl: 0 8px 24px 0 rgb(0 0 0 / 0.12);
+  /* ---- 阴影（分层柔和投影，浅色下替代重边框） ---- */
+  --shadow-xs: 0 1px 2px 0 rgb(16 19 34 / 0.04);
+  --shadow-sm: 0 1px 3px 0 rgb(16 19 34 / 0.06), 0 1px 2px -1px rgb(16 19 34 / 0.04);
+  --shadow-md: 0 4px 12px -2px rgb(16 19 34 / 0.08), 0 2px 6px -2px rgb(16 19 34 / 0.05);
+  --shadow-lg: 0 12px 28px -6px rgb(16 19 34 / 0.12), 0 4px 10px -4px rgb(16 19 34 / 0.06);
+  --shadow-xl: 0 24px 52px -12px rgb(16 19 34 / 0.20), 0 8px 16px -8px rgb(16 19 34 / 0.10);
 
   /* ---- 动效 ---- */
-  --duration-fast: 100ms;
-  --duration-base: 150ms;
-  --duration-slow: 250ms;
-  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --duration-fast: 120ms;
+  --duration-base: 180ms;
+  --duration-slow: 280ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in: cubic-bezier(0.4, 0, 1, 1);
   --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+
+  /* ---- 排版 ---- */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI Variable Text",
+    "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei UI",
+    "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-mono: "JetBrains Mono", "SFMono-Regular", ui-monospace, Consolas,
+    "Liberation Mono", monospace;
+  /* 中文标题不做负字距（中文字面宽，收紧会挤），仅拉丁文生效 */
+  --tracking-heading: -0.011em;
 
   /* ---- 布局 ---- */
-  --sidebar-width: 200px;
-  --sidebar-width-collapsed: 56px;
-  --topbar-height: 48px;
-  --tabbar-height: 40px;
+  --sidebar-width: 232px;
+  --sidebar-width-collapsed: 68px;
+  --topbar-height: 56px;
+  /* 分段控件（同页视图切换）高度 */
+  --tabbar-height: 36px;
+  /* 内容区最大宽度，超宽屏下避免长行难读 */
+  --content-max-width: 1440px;
 }
 
 /* ==========================================================================
    暗色模式
+   采用「深冷灰」而非纯黑：纯黑会让边框消失、阴影失效。
    ========================================================================== */
 
 [data-theme="dark"] {
-  /* ---- 主色 ---- */
-  --color-primary-subtle: #111d2c;
-  --color-primary-muted: #15395b;
-  --color-primary: #1677ff;
-  --color-primary-hover: #4096ff;
-  --color-primary-active: #0958d9;
+  /* ---- 主色：暗色下提亮，保证对比度 ---- */
+  --color-primary-subtle: #1e1e3d;
+  --color-primary-muted: #33336b;
+  --color-primary: #7c7ce8;
+  --color-primary-hover: #8d8dee;
+  --color-primary-active: #6a6ad9;
   --color-primary-fg: #ffffff;
+  --color-primary-ring: rgb(124 124 232 / 0.28);
 
   /* ---- 顶栏 ---- */
-  --color-topbar-bg: #15395b;
-  --color-topbar-fg: #ffffff;
-  --color-topbar-hover: rgb(255 255 255 / 0.12);
-  --color-topbar-active: rgb(255 255 255 / 0.20);
+  --color-topbar-bg: #16181f;
+  --color-topbar-fg: #e9eaf0;
+  --color-topbar-muted: #8b91a1;
+  --color-topbar-hover: rgb(255 255 255 / 0.06);
+  --color-topbar-active: rgb(255 255 255 / 0.11);
 
   /* ---- 中性色 ---- */
-  --color-bg: #141414;
-  --color-surface: #1f1f1f;
-  --color-surface-hover: #2a2a2a;
-  --color-surface-active: #333333;
-  --color-border: #303030;
-  --color-border-strong: #424242;
-  --color-text: #e8e8e8;
-  --color-text-secondary: #a6a6a6;
-  --color-text-muted: #6b6b6b;
-  --color-text-inverse: #141414;
+  --color-bg: #0e0f14;
+  --color-surface: #16181f;
+  --color-surface-hover: #1d2029;
+  --color-surface-active: #252833;
+  --color-surface-inset: #12141a;
+  --color-border: #252832;
+  --color-border-strong: #343846;
+  --color-text: #e9eaf0;
+  --color-text-secondary: #a2a7b6;
+  --color-text-muted: #767d8d;
+  --color-text-inverse: #0e0f14;
 
   /* ---- 功能色 ---- */
-  --color-success-subtle: #0d2818;
-  --color-success-muted: #135200;
-  --color-success: #49aa19;
-  --color-success-fg: #ffffff;
+  --color-success-subtle: #10261c;
+  --color-success-muted: #1c5137;
+  --color-success: #3fbf7f;
+  --color-success-fg: #04160d;
 
-  --color-warning-subtle: #2b1d11;
-  --color-warning-muted: #613400;
-  --color-warning: #d89614;
-  --color-warning-fg: #ffffff;
+  --color-warning-subtle: #2a1f10;
+  --color-warning-muted: #5c421c;
+  --color-warning: #e0a355;
+  --color-warning-fg: #1a1204;
 
-  --color-danger-subtle: #2a1215;
-  --color-danger-muted: #58181c;
-  --color-danger: #d32029;
-  --color-danger-hover: #e84749;
-  --color-danger-fg: #ffffff;
+  --color-danger-subtle: #2b1614;
+  --color-danger-muted: #5e2b26;
+  --color-danger: #f2685c;
+  --color-danger-hover: #f5847a;
+  --color-danger-fg: #1c0908;
 
-  --color-info-subtle: #111d2c;
-  --color-info-muted: #15395b;
-  --color-info: #177ddc;
-  --color-info-fg: #ffffff;
+  --color-info-subtle: #12203a;
+  --color-info-muted: #274673;
+  --color-info: #6ea8f5;
+  --color-info-fg: #061424;
 
-  /* ---- 统计卡浅色底（暗色下改为深色底） ---- */
-  --color-stat-blue-bg: #111d2c;
-  --color-stat-blue-fg: #4096ff;
-  --color-stat-orange-bg: #2b1d11;
-  --color-stat-orange-fg: #d89614;
-  --color-stat-green-bg: #0d2818;
-  --color-stat-green-fg: #49aa19;
-  --color-stat-purple-bg: #1a1325;
-  --color-stat-purple-fg: #9254de;
-  --color-stat-red-bg: #2a1215;
-  --color-stat-red-fg: #d32029;
+  /* ---- 数据可视化配色（暗色下改为深底 + 高亮前景） ---- */
+  --color-stat-blue-bg: #1e1e3d;
+  --color-stat-blue-fg: #a5a5f2;
+  --color-stat-orange-bg: #2a1f10;
+  --color-stat-orange-fg: #e0a355;
+  --color-stat-green-bg: #10261c;
+  --color-stat-green-fg: #56cc92;
+  --color-stat-purple-bg: #241634;
+  --color-stat-purple-fg: #b18cf0;
+  --color-stat-red-bg: #2b1614;
+  --color-stat-red-fg: #f2685c;
 
-  /* ---- 阴影：暗色下减弱，改用边框区分层级 ---- */
-  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.20);
-  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.30);
-  --shadow-md: 0 2px 8px 0 rgb(0 0 0 / 0.35);
-  --shadow-lg: 0 4px 16px 0 rgb(0 0 0 / 0.40);
-  --shadow-xl: 0 8px 24px 0 rgb(0 0 0 / 0.45);
+  /* ---- 阴影：暗色下加深，保证层级可辨 ---- */
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.40);
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.45), 0 1px 2px -1px rgb(0 0 0 / 0.35);
+  --shadow-md: 0 4px 12px -2px rgb(0 0 0 / 0.50), 0 2px 6px -2px rgb(0 0 0 / 0.35);
+  --shadow-lg: 0 12px 28px -6px rgb(0 0 0 / 0.60), 0 4px 10px -4px rgb(0 0 0 / 0.40);
+  --shadow-xl: 0 24px 52px -12px rgb(0 0 0 / 0.70), 0 8px 16px -8px rgb(0 0 0 / 0.45);
 }
 
 /* ==========================================================================
@@ -181,6 +210,8 @@
 
 html {
   color-scheme: light;
+  /* 滚动条随主题变色 */
+  scrollbar-color: var(--color-border-strong) transparent;
 }
 
 [data-theme="dark"] {
@@ -190,17 +221,36 @@ html {
 body {
   background-color: var(--color-bg);
   color: var(--color-text);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
-    "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial,
-    sans-serif;
+  font-family: var(--font-sans);
   font-size: 14px;
-  line-height: 22px;
+  line-height: 21px;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
-/* 数字对齐 */
+h1,
+h2,
+h3,
+h4 {
+  letter-spacing: var(--tracking-heading);
+  text-wrap: balance;
+}
+
+/* 数字对齐：所有金额、计数、日期都应带此类 */
 .tabular {
   font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* 小号大写标签（区块标题、表头） */
+.label-caps {
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
 }
 
 /* 隐藏 Alpine 初始化前的元素 */
@@ -210,24 +260,33 @@ body {
 
 /* 滚动条美化 */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
   background: var(--color-border-strong);
-  border-radius: 4px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+  border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-text-muted);
+  background-clip: content-box;
 }
 
-/* 焦点环统一 */
+/* 焦点环统一：仅键盘导航可见 */
 :focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
+}
+
+/* 选中文字配色 */
+::selection {
+  background: var(--color-primary-muted);
+  color: var(--color-text);
 }
 
 /* 尊重用户的动效偏好 */

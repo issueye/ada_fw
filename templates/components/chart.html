@@ -1,0 +1,144 @@
+{# ==========================================================================
+   Chart · 面积折线图（纯 SVG，无第三方图表库）
+   参数：
+     chart - {
+       width, height,
+       legend: bool,
+       x_labels: [String],
+       y_axis:   [{ text, y, top_pct }],   # y 为 viewBox 内像素坐标
+       series:   [{ name, variant, line_path, area_path }]
+     }
+
+   实现说明：
+   - SVG 使用 preserveAspectRatio="none" 横向拉伸以适应容器，
+     同时用 vector-effect="non-scaling-stroke" 保持线宽不被拉扁。
+   - 文字不放进 SVG：拉伸会同时横向压扁字形，
+     因此 Y 轴标签用绝对定位的 HTML 呈现，X 轴标签用 flex 均分。
+   ========================================================================== #}
+{% macro area(chart) %}
+{%- set h = chart.height | default(240) -%}
+{%- set h_px = h ~ "px" -%}
+{%- set fg = {
+  "blue":   "text-stat-blue-fg",
+  "green":  "text-stat-green-fg",
+  "orange": "text-stat-orange-fg",
+  "purple": "text-stat-purple-fg",
+  "red":    "text-stat-red-fg",
+  "primary": "text-primary",
+  "info":   "text-info",
+  "muted":  "text-content-muted"
+} -%}
+{%- set dot = {
+  "blue":   "bg-stat-blue-fg",
+  "green":  "bg-stat-green-fg",
+  "orange": "bg-stat-orange-fg",
+  "purple": "bg-stat-purple-fg",
+  "red":    "bg-stat-red-fg",
+  "primary": "bg-primary",
+  "info":   "bg-info",
+  "muted":  "bg-content-muted"
+} -%}
+<div class="space-y-3">
+  {% if chart.legend %}
+  <div class="flex flex-wrap items-center gap-x-5 gap-y-2">
+    {% for s in chart.series %}
+    <span class="inline-flex items-center gap-2 text-xs text-content-secondary">
+      <span class="h-2 w-2 rounded-full {{ dot[s.variant] | default(dot['primary']) }}" aria-hidden="true"></span>
+      {{ s.name }}
+    </span>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="flex gap-3">
+    {# Y 轴标签（HTML，避免 SVG 拉伸导致字形变形） #}
+    <div class="relative w-11 shrink-0" style="height: {{ h_px }}">
+      {% for g in chart.y_axis %}
+      <span class="absolute right-0 -translate-y-1/2 tabular text-2xs text-content-muted"
+            style="top: {{ g.top_pct }}%">{{ g.text }}</span>
+      {% endfor %}
+    </div>
+
+    {# 绘图区 #}
+    <div class="min-w-0 flex-1">
+      <div class="relative w-full" style="height: {{ h_px }}">
+        <svg class="h-full w-full" viewBox="0 0 {{ chart.width }} {{ h }}"
+             preserveAspectRatio="none" aria-hidden="true">
+          {# 横向网格线 #}
+          {% for g in chart.y_axis %}
+          <line x1="0" y1="{{ g.y }}" x2="{{ chart.width }}" y2="{{ g.y }}" class="chart-grid-line"/>
+          {% endfor %}
+
+          {# 数据系列 #}
+          {% for s in chart.series %}
+          <path d="{{ s.area_path }}" fill="currentColor" stroke="none"
+                class="{{ fg[s.variant] | default(fg['primary']) }} opacity-[0.10]"/>
+          <path d="{{ s.line_path }}" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"
+                class="{{ fg[s.variant] | default(fg['primary']) }}"/>
+          {% endfor %}
+        </svg>
+      </div>
+
+      {# X 轴标签 #}
+      <div class="mt-2 flex justify-between text-2xs text-content-muted">
+        {% for label in chart.x_labels %}
+        <span class="tabular">{{ label }}</span>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endmacro %}
+
+
+{# ==========================================================================
+   Sparkline · 迷你趋势线（用于指标卡、列表行）
+   ========================================================================== #}
+{% macro sparkline(points, variant="primary", height=28) %}
+{%- set fg = {
+  "blue": "text-stat-blue-fg",
+  "green": "text-stat-green-fg",
+  "orange": "text-stat-orange-fg",
+  "purple": "text-stat-purple-fg",
+  "red": "text-stat-red-fg",
+  "primary": "text-primary"
+} -%}
+<svg class="w-full {{ fg[variant] | default(fg['primary']) }}" style="height: {{ height }}px"
+     viewBox="0 0 100 {{ height }}" preserveAspectRatio="none" aria-hidden="true">
+  <polyline points="{{ points }}" fill="none" stroke="currentColor" stroke-width="1.5"
+            stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
+</svg>
+{% endmacro %}
+
+
+{# ==========================================================================
+   BarChart · 横向条形排行（纯 CSS，比图表更易读的 Top-N）
+   参数：items - [{ label, value, pct, caption }]
+   ========================================================================== #}
+{% macro bars(items=[], variant="primary") %}
+{%- set bar = {
+  "primary": "bg-primary",
+  "blue": "bg-stat-blue-fg",
+  "green": "bg-stat-green-fg",
+  "orange": "bg-stat-orange-fg",
+  "purple": "bg-stat-purple-fg"
+} -%}
+<ul class="space-y-4">
+  {% for item in items %}
+  <li>
+    <div class="mb-1.5 flex items-baseline justify-between gap-3">
+      <span class="truncate text-sm text-content">{{ item.label }}</span>
+      <span class="shrink-0 tabular text-sm font-medium text-content">{{ item.value }}</span>
+    </div>
+    <div class="h-1.5 w-full overflow-hidden rounded-full bg-surface-active">
+      <div class="h-full rounded-full {{ bar[variant] | default(bar['primary']) }}"
+           style="width: {{ item.pct }}%"></div>
+    </div>
+    {% if item.caption %}
+    <p class="mt-1 text-2xs text-content-muted">{{ item.caption }}</p>
+    {% endif %}
+  </li>
+  {% endfor %}
+</ul>
+{% endmacro %}

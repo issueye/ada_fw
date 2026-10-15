@@ -21,7 +21,7 @@
           warning: { subtle: 'var(--color-warning-subtle)', muted: 'var(--color-warning-muted)', DEFAULT: 'var(--color-warning)', fg: 'var(--color-warning-fg)' },
           danger: { subtle: 'var(--color-danger-subtle)', muted: 'var(--color-danger-muted)', DEFAULT: 'var(--color-danger)', hover: 'var(--color-danger-hover)', fg: 'var(--color-danger-fg)' },
           info: { subtle: 'var(--color-info-subtle)', muted: 'var(--color-info-muted)', DEFAULT: 'var(--color-info)', fg: 'var(--color-info-fg)' },
-          topbar: { DEFAULT: 'var(--color-topbar-bg)', fg: 'var(--color-topbar-fg)', hover: 'var(--color-topbar-hover)', active: 'var(--color-topbar-active)' },
+          topbar: { DEFAULT: 'var(--color-topbar-bg)', fg: 'var(--color-topbar-fg)', muted: 'var(--color-topbar-muted)', hover: 'var(--color-topbar-hover)', active: 'var(--color-topbar-active)' },
           stat: {
             'blue-bg': 'var(--color-stat-blue-bg)', 'blue-fg': 'var(--color-stat-blue-fg)',
             'orange-bg': 'var(--color-stat-orange-bg)', 'orange-fg': 'var(--color-stat-orange-fg)',
@@ -30,19 +30,17 @@
             'red-bg': 'var(--color-stat-red-bg)', 'red-fg': 'var(--color-stat-red-fg)'
           },
           bg: 'var(--color-bg)',
-          surface: { DEFAULT: 'var(--color-surface)', hover: 'var(--color-surface-hover)', active: 'var(--color-surface-active)' },
+          surface: { DEFAULT: 'var(--color-surface)', hover: 'var(--color-surface-hover)', active: 'var(--color-surface-active)', inset: 'var(--color-surface-inset)' },
           border: { DEFAULT: 'var(--color-border)', strong: 'var(--color-border-strong)' },
           content: { DEFAULT: 'var(--color-text)', secondary: 'var(--color-text-secondary)', muted: 'var(--color-text-muted)', inverse: 'var(--color-text-inverse)' }
         },
-        borderRadius: { sm: 'var(--radius-sm)', md: 'var(--radius-md)', lg: 'var(--radius-lg)', xl: 'var(--radius-xl)' },
+        borderRadius: { sm: 'var(--radius-sm)', md: 'var(--radius-md)', lg: 'var(--radius-lg)', xl: 'var(--radius-xl)', full: 'var(--radius-full)' },
         boxShadow: { xs: 'var(--shadow-xs)', sm: 'var(--shadow-sm)', md: 'var(--shadow-md)', lg: 'var(--shadow-lg)', xl: 'var(--shadow-xl)' },
         transitionDuration: { fast: 'var(--duration-fast)', base: 'var(--duration-base)', slow: 'var(--duration-slow)' },
-        transitionTimingFunction: { out: 'var(--ease-out)', in: 'var(--ease-in)', 'in-out': 'var(--ease-in-out)' },
-        spacing: { sidebar: 'var(--sidebar-width)', 'sidebar-collapsed': 'var(--sidebar-width-collapsed)', topbar: 'var(--topbar-height)', tabbar: 'var(--tabbar-height)' },
-        fontFamily: {
-          sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'],
-          mono: ['JetBrains Mono', 'SFMono-Regular', 'Consolas', 'monospace']
-        }
+        transitionTimingFunction: { out: 'var(--ease-out)', in: 'var(--ease-in)', 'in-out': 'var(--ease-in-out)', spring: 'var(--ease-spring)' },
+        spacing: { sidebar: 'var(--sidebar-width)', 'sidebar-collapsed': 'var(--sidebar-width-collapsed)', topbar: 'var(--topbar-height)', tabbar: 'var(--tabbar-height)', content: 'var(--content-max-width)' },
+        fontFamily: { sans: ['var(--font-sans)'], mono: ['var(--font-mono)'] },
+        fontSize: { '2xs': ['11px', { lineHeight: '16px' }] }
       }
     }
   };

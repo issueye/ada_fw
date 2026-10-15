@@ -12,28 +12,28 @@
      class="fixed inset-0 z-50 flex items-center justify-center p-4"
      role="dialog" aria-modal="true" aria-labelledby="modal-title-{{ id }}"
      @keydown.escape.window="{% if closable %}openModal = null{% endif %}">
-  {# 遮罩 #}
-  <div class="absolute inset-0 bg-black/50 animate-fade-in"
+  {# 遮罩：轻微模糊，让下层内容退到背景 #}
+  <div class="absolute inset-0 bg-black/40 backdrop-blur-[2px] animate-fade-in"
        {% if closable %}@click="openModal = null"{% endif %}></div>
 
   {# 内容 #}
   <div class="relative w-full {{ sizes[size] | default(sizes['md']) }} animate-scale-in rounded-xl border border-border bg-surface shadow-xl">
     {% if title %}
-    <header class="flex items-center justify-between border-b border-border px-6 py-4">
-      <h2 id="modal-title-{{ id }}" class="text-base font-semibold text-content">{{ title }}</h2>
+    <header class="flex items-center justify-between gap-4 border-b border-border px-5 py-3.5">
+      <h2 id="modal-title-{{ id }}" class="text-[15px] font-semibold tracking-tight text-content">{{ title }}</h2>
       {% if closable %}
       <button type="button" @click="openModal = null"
-              class="rounded-md p-1 text-content-muted transition-colors duration-fast hover:bg-surface-hover hover:text-content"
+              class="-mr-1 rounded-md p-1.5 text-content-muted transition-colors duration-fast hover:bg-surface-hover hover:text-content"
               aria-label="关闭">
-        <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-          <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"/>
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <path d="M18 6 6 18M6 6l12 12"/>
         </svg>
       </button>
       {% endif %}
     </header>
     {% endif %}
 
-    <div class="px-6 py-5">{{ caller() }}</div>
+    <div class="px-5 py-4">{{ caller() }}</div>
   </div>
 </div>
 {% endmacro %}
@@ -45,21 +45,21 @@
 <div x-show="openModal === '{{ id }}'" x-cloak
      class="fixed inset-0 z-50 flex items-center justify-center p-4"
      role="dialog" aria-modal="true" @keydown.escape.window="openModal = null">
-  <div class="absolute inset-0 bg-black/50 animate-fade-in" @click="openModal = null"></div>
-  <div class="relative flex w-full {{ sizes[size] | default(sizes['md']) }} max-h-[85vh] flex-col animate-scale-in rounded-xl border border-border bg-surface shadow-xl">
-    <header class="flex items-center justify-between border-b border-border px-6 py-4">
-      <h2 class="text-base font-semibold text-content">{{ title }}</h2>
+  <div class="absolute inset-0 bg-black/40 backdrop-blur-[2px] animate-fade-in" @click="openModal = null"></div>
+  <div class="relative flex max-h-[85vh] w-full {{ sizes[size] | default(sizes['md']) }} animate-scale-in flex-col overflow-hidden rounded-xl border border-border bg-surface shadow-xl">
+    <header class="flex shrink-0 items-center justify-between gap-4 border-b border-border px-5 py-3.5">
+      <h2 class="text-[15px] font-semibold tracking-tight text-content">{{ title }}</h2>
       <button type="button" @click="openModal = null"
-              class="rounded-md p-1 text-content-muted transition-colors duration-fast hover:bg-surface-hover hover:text-content"
+              class="-mr-1 rounded-md p-1.5 text-content-muted transition-colors duration-fast hover:bg-surface-hover hover:text-content"
               aria-label="关闭">
-        <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-          <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"/>
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <path d="M18 6 6 18M6 6l12 12"/>
         </svg>
       </button>
     </header>
-    <div class="flex-1 overflow-y-auto px-6 py-5">{{ caller() }}</div>
+    <div class="flex-1 overflow-y-auto px-5 py-4">{{ caller() }}</div>
     {% if footer %}
-    <footer class="flex items-center justify-end gap-2 border-t border-border px-6 py-4">{{ footer | safe }}</footer>
+    <footer class="flex shrink-0 items-center justify-end gap-2 border-t border-border bg-surface-inset px-5 py-3.5">{{ footer | safe }}</footer>
     {% endif %}
   </div>
 </div>
@@ -87,19 +87,19 @@
 <div x-show="openDrawer === '{{ id }}'" x-cloak
      class="fixed inset-0 z-50" role="dialog" aria-modal="true"
      @keydown.escape.window="openDrawer = null">
-  <div class="absolute inset-0 bg-black/50 animate-fade-in" @click="openDrawer = null"></div>
+  <div class="absolute inset-0 bg-black/40 backdrop-blur-[2px] animate-fade-in" @click="openDrawer = null"></div>
   <div class="absolute {{ pos[side] | default(pos['right']) }} {{ widths[size] | default(widths['md']) if side in ['left', 'right'] else '' }} flex flex-col border-border bg-surface shadow-xl {{ anim[side] | default(anim['right']) }}">
-    <header class="flex items-center justify-between border-b border-border px-6 py-4">
-      <h2 class="text-base font-semibold text-content">{{ title }}</h2>
+    <header class="flex shrink-0 items-center justify-between gap-4 border-b border-border px-5 py-3.5">
+      <h2 class="text-[15px] font-semibold tracking-tight text-content">{{ title }}</h2>
       <button type="button" @click="openDrawer = null"
-              class="rounded-md p-1 text-content-muted transition-colors duration-fast hover:bg-surface-hover hover:text-content"
+              class="-mr-1 rounded-md p-1.5 text-content-muted transition-colors duration-fast hover:bg-surface-hover hover:text-content"
               aria-label="关闭">
-        <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-          <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"/>
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <path d="M18 6 6 18M6 6l12 12"/>
         </svg>
       </button>
     </header>
-    <div class="flex-1 overflow-y-auto px-6 py-5">{{ caller() }}</div>
+    <div class="flex-1 overflow-y-auto px-5 py-4">{{ caller() }}</div>
   </div>
 </div>
 {% endmacro %}
@@ -113,32 +113,32 @@
    ========================================================================== #}
 {% macro toast_container() %}
 <div x-data="feedback()" @ada-toast.window="toast($event.detail.title, $event.detail.message, $event.detail.type)"
-     class="pointer-events-none fixed right-4 top-4 z-[60] flex w-full max-w-sm flex-col gap-2"
+     class="pointer-events-none fixed right-5 top-5 z-[60] flex w-full max-w-sm flex-col gap-2"
      role="region" aria-live="polite" aria-label="通知">
   <template x-for="t in toasts" :key="t.id">
-    <div class="pointer-events-auto flex items-start gap-3 rounded-lg border p-4 shadow-lg animate-toast-in"
-         :class="{
-           'border-info-muted bg-info-subtle': t.type === 'info',
-           'border-success-muted bg-success-subtle': t.type === 'success',
-           'border-warning-muted bg-warning-subtle': t.type === 'warning',
-           'border-danger-muted bg-danger-subtle': t.type === 'danger'
-         }">
-      <svg class="h-5 w-5 shrink-0" :class="{
-             'text-info': t.type === 'info',
-             'text-success': t.type === 'success',
-             'text-warning': t.type === 'warning',
-             'text-danger': t.type === 'danger'
-           }" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd"/>
-      </svg>
-      <div class="flex-1">
+    <div class="pointer-events-auto flex items-start gap-3 rounded-lg border border-border bg-surface p-3.5 shadow-lg animate-toast-in">
+      <span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full"
+            :class="{
+              'bg-info-subtle text-info': t.type === 'info',
+              'bg-success-subtle text-success': t.type === 'success',
+              'bg-warning-subtle text-warning': t.type === 'warning',
+              'bg-danger-subtle text-danger': t.type === 'danger'
+            }">
+        <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path x-show="t.type === 'success'" d="m8.5 12.5 2.5 2.5 4.5-5"/>
+          <path x-show="t.type === 'danger'" d="M12 8v5M12 16.5h.01"/>
+          <path x-show="t.type === 'info' || t.type === 'warning'" d="M12 16v-5M12 8h.01"/>
+        </svg>
+      </span>
+      <div class="min-w-0 flex-1">
         <p class="text-sm font-medium text-content" x-text="t.title"></p>
         <p class="mt-0.5 text-sm text-content-secondary" x-show="t.message" x-text="t.message"></p>
       </div>
       <button type="button" @click="dismissToast(t.id)"
-              class="shrink-0 text-content-muted transition-colors duration-fast hover:text-content" aria-label="关闭">
-        <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-          <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"/>
+              class="-mr-1 shrink-0 rounded p-1 text-content-muted transition-colors duration-fast hover:bg-surface-hover hover:text-content" aria-label="关闭">
+        <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <path d="M18 6 6 18M6 6l12 12"/>
         </svg>
       </button>
     </div>
@@ -177,32 +177,34 @@
    ========================================================================== #}
 {% macro confirm_dialog() %}
 <div x-data="feedback()"
-     @ada-confirm.window="confirm($event.detail.title, $event.detail.message)"
+     @ada-confirm.window="confirm($event.detail.title, $event.detail.message, $event.detail.payload)"
      x-show="confirmState.open" x-cloak
      class="fixed inset-0 z-[70] flex items-center justify-center p-4"
      role="alertdialog" aria-modal="true" @keydown.escape.window="confirmState.open = false">
-  <div class="absolute inset-0 bg-black/50 animate-fade-in" @click="confirmState.open = false"></div>
-  <div class="relative w-full max-w-sm animate-scale-in rounded-xl border border-border bg-surface p-6 shadow-xl">
-    <div class="flex gap-4">
-      <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-danger-subtle">
-        <svg class="h-5 w-5 text-danger" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-          <path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/>
+  <div class="absolute inset-0 bg-black/40 backdrop-blur-[2px] animate-fade-in" @click="confirmState.open = false"></div>
+  <div class="relative w-full max-w-sm animate-scale-in rounded-xl border border-border bg-surface p-5 shadow-xl">
+    <div class="flex gap-3.5">
+      <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-danger-subtle">
+        <svg class="h-4 w-4 text-danger" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M10.3 3.9 2.6 17a2 2 0 0 0 1.7 3h15.4a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/>
         </svg>
       </div>
-      <div class="flex-1">
-        <h3 class="text-base font-semibold text-content" x-text="confirmState.title"></h3>
+      <div class="min-w-0 flex-1">
+        <h3 class="text-[15px] font-semibold tracking-tight text-content" x-text="confirmState.title"></h3>
         <p class="mt-1 text-sm text-content-secondary" x-text="confirmState.message"></p>
       </div>
     </div>
-    <div class="mt-6 flex justify-end gap-2">
+    <div class="mt-5 flex justify-end gap-2">
       <button type="button" @click="confirmState.open = false"
-              class="inline-flex h-9 items-center rounded-md border border-border-strong bg-surface px-4 text-sm font-medium text-content transition-colors duration-base hover:bg-surface-hover focus-ring">
+              class="inline-flex h-9 items-center rounded-md border border-border-strong bg-surface px-3.5 text-sm font-medium text-content shadow-xs transition-colors duration-base hover:bg-surface-hover focus-ring">
         取消
       </button>
       <button type="button" @click="confirmState.onConfirm && confirmState.onConfirm(); confirmState.open = false"
-              class="inline-flex h-9 items-center rounded-md bg-danger px-4 text-sm font-medium text-danger-fg shadow-xs transition-colors duration-base hover:bg-danger-hover focus-ring">
-        确认
-      </button>    </div>
+              class="inline-flex h-9 items-center rounded-md bg-danger px-3.5 text-sm font-medium text-danger-fg shadow-xs transition-colors duration-base hover:bg-danger-hover focus-ring">
+        确认删除
+      </button>
+    </div>
   </div>
 </div>
 {% endmacro %}

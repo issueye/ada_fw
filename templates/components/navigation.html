@@ -4,17 +4,20 @@
    ========================================================================== #}
 {% macro breadcrumb(items=[]) %}
 <nav aria-label="面包屑">
-  <ol class="flex items-center gap-1.5 text-sm">
+  <ol class="flex items-center gap-2 text-sm">
     {% for item in items %}
-    <li class="flex items-center gap-1.5">
+    {# 窄屏只保留当前页，避免与顶栏操作区争抢宽度导致文字被截断 #}
+    <li class="min-w-0 items-center gap-2 {% if loop.last %}flex{% else %}hidden sm:flex{% endif %}">
       {% if item.href and not loop.last %}
-      <a href="{{ item.href | safe }}" class="text-content-secondary transition-colors duration-fast hover:text-primary">{{ item.label }}</a>
+      <a href="{{ item.href | safe }}"
+         class="truncate text-content-muted transition-colors duration-fast hover:text-content">{{ item.label }}</a>
       {% else %}
-      <span class="font-medium text-content" aria-current="page">{{ item.label }}</span>
+      <span class="truncate font-medium text-content" aria-current="page">{{ item.label }}</span>
       {% endif %}
       {% if not loop.last %}
-      <svg class="h-3.5 w-3.5 text-content-muted" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-        <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd"/>
+      <svg class="h-3.5 w-3.5 shrink-0 text-content-muted" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="m9 6 6 6-6 6"/>
       </svg>
       {% endif %}
     </li>
@@ -25,40 +28,40 @@
 
 
 {# ==========================================================================
-   Tabs · 标签页
+   Tabs · 视图切换
    参数：
-     items  - [{ id, label, badge, active }]
-     variant - underline | pill（默认 underline）
-     name   - Alpine 状态变量名（可选，用于客户端切换）
+     items   - [{ id, label, badge, active }]
+     variant - segment（分段控件，默认）| underline（下划线）
+     name    - Alpine 状态变量名（可选，用于客户端切换）
    ========================================================================== #}
-{% macro tabs(items=[], variant="underline", name="") %}
-{% if variant == "pill" %}
-<div class="inline-flex items-center gap-1 rounded-lg bg-surface-hover p-1" role="tablist">
-  {% for item in items %}
-  <button type="button" role="tab"
-          {% if name %}@click="{{ name }} = '{{ item.id }}'" :class="{{ name }} === '{{ item.id }}' && 'bg-surface shadow-xs text-content' || 'text-content-secondary hover:text-content'"{% endif %}
-          class="inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium transition-colors duration-base
-                 {% if item.active and not name %}bg-surface text-content shadow-xs{% elif not name %}text-content-secondary hover:text-content{% endif %}"
-          aria-selected="{{ 'true' if item.active else 'false' }}">
-    {{ item.label }}
-    {% if item.badge %}<span class="rounded-full bg-primary-subtle px-1.5 text-xs text-primary">{{ item.badge }}</span>{% endif %}
-  </button>
-  {% endfor %}
-</div>
-{% else %}
+{% macro tabs(items=[], variant="segment", name="") %}
+{% if variant == "underline" %}
 <div class="border-b border-border" role="tablist">
-  <div class="flex items-center gap-6">
+  <div class="-mb-px flex items-center gap-6">
     {% for item in items %}
     <button type="button" role="tab"
-            {% if name %}@click="{{ name }} = '{{ item.id }}'" :class="{{ name }} === '{{ item.id }}' && 'border-primary text-primary' || 'border-transparent text-content-secondary hover:text-content hover:border-border-strong'"{% endif %}
+            {% if name %}@click="{{ name }} = '{{ item.id }}'" :class="{{ name }} === '{{ item.id }}' && 'border-primary text-content' || 'border-transparent text-content-secondary hover:border-border-strong hover:text-content'"{% endif %}
             class="inline-flex items-center gap-2 border-b-2 pb-3 text-sm font-medium transition-colors duration-base
-                   {% if item.active and not name %}border-primary text-primary{% elif not name %}border-transparent text-content-secondary hover:border-border-strong hover:text-content{% endif %}"
+                   {% if item.active and not name %}border-primary text-content{% elif not name %}border-transparent text-content-secondary hover:border-border-strong hover:text-content{% endif %}"
             aria-selected="{{ 'true' if item.active else 'false' }}">
       {{ item.label }}
-      {% if item.badge %}<span class="rounded-full bg-primary-subtle px-1.5 text-xs text-primary">{{ item.badge }}</span>{% endif %}
+      {% if item.badge %}<span class="rounded-full bg-primary-subtle px-1.5 text-2xs font-semibold text-primary">{{ item.badge }}</span>{% endif %}
     </button>
     {% endfor %}
   </div>
+</div>
+{% else %}
+<div class="segmented" role="tablist">
+  {% for item in items %}
+  <button type="button" role="tab"
+          {% if name %}@click="{{ name }} = '{{ item.id }}'" :class="{{ name }} === '{{ item.id }}' ? 'tab-item-active' : ''"{% endif %}
+          class="tab-item
+                 {% if item.active and not name %}tab-item-active{% endif %}"
+          aria-selected="{{ 'true' if item.active else 'false' }}">
+    {{ item.label }}
+    {% if item.badge %}<span class="text-2xs font-semibold text-content-muted">{{ item.badge }}</span>{% endif %}
+  </button>
+  {% endfor %}
 </div>
 {% endif %}
 {% endmacro %}
@@ -77,41 +80,42 @@
 {%- set start = [1, page - 2] | max -%}
 {%- set end = [total_pages, start + 4] | min -%}
 {%- set start = [1, end - 4] | max -%}
+{%- set btn = "inline-flex h-8 min-w-8 items-center justify-center rounded-md border border-border px-2.5 text-sm text-content-secondary transition-colors duration-fast hover:bg-surface-hover hover:text-content" -%}
 <div class="flex flex-col items-center justify-between gap-4 sm:flex-row">
-  <p class="text-sm text-content-secondary">
-    共 <span class="tabular font-medium text-content">{{ total }}</span> 条，
-    第 <span class="tabular font-medium text-content">{{ page }}</span> / {{ total_pages }} 页
+  <p class="text-sm text-content-muted">
+    共 <span class="tabular font-medium text-content">{{ total }}</span> 条 · 第
+    <span class="tabular font-medium text-content">{{ page }}</span> / {{ total_pages }} 页
   </p>
 
   <nav class="flex items-center gap-1" aria-label="分页">
     {# 上一页 #}
     {% if page > 1 %}
-    <a href="{{ base_url }}{{ page - 1 }}" class="inline-flex h-8 items-center gap-1 rounded-md border border-border px-2.5 text-sm text-content-secondary transition-colors duration-fast hover:bg-surface-hover" aria-label="上一页">
-      <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clip-rule="evenodd"/></svg>
+    <a href="{{ base_url }}{{ page - 1 }}" class="{{ btn }}" aria-label="上一页">
+      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
     </a>
     {% else %}
-    <span class="inline-flex h-8 items-center rounded-md border border-border px-2.5 text-content-muted opacity-50" aria-disabled="true">
-      <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clip-rule="evenodd"/></svg>
+    <span class="inline-flex h-8 min-w-8 items-center justify-center rounded-md border border-border px-2.5 text-content-muted opacity-45" aria-disabled="true">
+      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
     </span>
     {% endif %}
 
     {# 页码 #}
     {% for p in range(start, end + 1) %}
     {% if p == page %}
-    <span class="inline-flex h-8 min-w-8 items-center justify-center rounded-md bg-primary px-2 text-sm font-medium text-primary-fg" aria-current="page">{{ p }}</span>
+    <span class="inline-flex h-8 min-w-8 items-center justify-center rounded-md bg-primary px-2 text-sm font-medium text-primary-fg shadow-xs" aria-current="page">{{ p }}</span>
     {% else %}
-    <a href="{{ base_url }}{{ p }}" class="inline-flex h-8 min-w-8 items-center justify-center rounded-md border border-border px-2 text-sm text-content-secondary transition-colors duration-fast hover:bg-surface-hover">{{ p }}</a>
+    <a href="{{ base_url }}{{ p }}" class="{{ btn }}">{{ p }}</a>
     {% endif %}
     {% endfor %}
 
     {# 下一页 #}
     {% if page < total_pages %}
-    <a href="{{ base_url }}{{ page + 1 }}" class="inline-flex h-8 items-center gap-1 rounded-md border border-border px-2.5 text-sm text-content-secondary transition-colors duration-fast hover:bg-surface-hover" aria-label="下一页">
-      <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd"/></svg>
+    <a href="{{ base_url }}{{ page + 1 }}" class="{{ btn }}" aria-label="下一页">
+      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
     </a>
     {% else %}
-    <span class="inline-flex h-8 items-center rounded-md border border-border px-2.5 text-content-muted opacity-50" aria-disabled="true">
-      <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd"/></svg>
+    <span class="inline-flex h-8 min-w-8 items-center justify-center rounded-md border border-border px-2.5 text-content-muted opacity-45" aria-disabled="true">
+      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
     </span>
     {% endif %}
   </nav>
@@ -134,15 +138,15 @@
   </div>
 
   <div x-show="open" x-cloak x-transition.origin.top
-       class="absolute z-30 mt-2 min-w-48 rounded-lg border border-border bg-surface py-1 shadow-lg
+       class="absolute z-50 mt-2 min-w-52 overflow-hidden rounded-lg border border-border bg-surface p-1 shadow-lg
               {% if align == 'left' %}left-0{% else %}right-0{% endif %}"
        role="menu">
     {% for item in items %}
       {% if item.divider %}
-      <div class="my-1 border-t border-border"></div>
+      <div class="my-1 h-px bg-border"></div>
       {% else %}
       <a href="{{ item.href | default('#') | safe }}"
-         class="flex items-center gap-2 px-3 py-2 text-sm transition-colors duration-fast
+         class="flex items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors duration-fast
                 {% if item.danger %}text-danger hover:bg-danger-subtle{% else %}text-content-secondary hover:bg-surface-hover hover:text-content{% endif %}"
          role="menuitem">
         {% if item.icon %}<span class="h-4 w-4 shrink-0" aria-hidden="true">{{ item.icon | safe }}</span>{% endif %}
@@ -156,26 +160,37 @@
 
 
 {# ==========================================================================
-   Menu · 侧边栏菜单
+   Menu · 侧边栏菜单（支持分组）
    参数：
-     items  - [{ label, href, icon, active, children: [{ label, href, active }] }]
+     items     - [{ label, href, icon, active, group, children: [...] }]
+                 group 相同的相邻项归为一组，组名以大写小字标签呈现
      collapsed - Alpine 表达式，控制折叠态
    ========================================================================== #}
 {% macro menu(items=[], collapsed="sidebarCollapsed") %}
-<nav class="space-y-0.5 py-2" aria-label="主导航">
+{%- set state = namespace(group="") -%}
+<div class="space-y-0.5">
   {% for item in items %}
+    {# ---- 分组标题：仅在 group 变化时输出一次 ---- #}
+    {%- set g = item.group if item.group else "" -%}
+    {% if g and g != state.group %}
+      {%- set state.group = g -%}
+      <p class="menu-group-label {% if not loop.first %}mt-5{% endif %} mb-1.5"
+         x-show="!{{ collapsed }}" x-transition.opacity>{{ g }}</p>
+    {% endif %}
+
     {% if item.children %}
     <div x-data="{ open: {{ 'true' if item.active else 'false' }} }">
       <button type="button" @click="open = !open"
-              class="menu-item w-full {% if item.active %}menu-item-active{% endif %}">
-        <span class="h-4 w-4 shrink-0" aria-hidden="true">{{ item.icon | safe }}</span>
+              class="menu-item w-full {% if item.active %}menu-item-active{% endif %}"
+              :class="{{ collapsed }} && 'justify-center px-0'">
+        <span class="h-[18px] w-[18px] shrink-0" aria-hidden="true">{{ item.icon | safe }}</span>
         <span x-show="!{{ collapsed }}" x-transition.opacity class="flex-1 text-left">{{ item.label }}</span>
-        <svg x-show="!{{ collapsed }}" class="h-3.5 w-3.5 shrink-0 transition-transform duration-base" :class="open && 'rotate-90'"
-             viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-          <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd"/>
+        <svg x-show="!{{ collapsed }}" class="h-3.5 w-3.5 shrink-0 text-content-muted transition-transform duration-base" :class="open && 'rotate-90'"
+             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="m9 6 6 6-6 6"/>
         </svg>
       </button>
-      <div x-show="open && !{{ collapsed }}" x-collapse class="space-y-0.5">
+      <div x-show="open && !{{ collapsed }}" x-collapse class="mt-0.5 space-y-0.5">
         {% for child in item.children %}
         <a href="{{ child.href | safe }}"
            class="menu-item pl-9 {% if child.active %}menu-item-active{% endif %}">
@@ -188,38 +203,81 @@
     <a href="{{ item.href | safe }}"
        class="menu-item {% if item.active %}menu-item-active{% endif %}"
        {% if item.active %}aria-current="page"{% endif %}
-       :title="{{ collapsed }} && '{{ item.label }}'">
-      <span class="h-4 w-4 shrink-0" aria-hidden="true">{{ item.icon | safe }}</span>
-      <span x-show="!{{ collapsed }}" x-transition.opacity>{{ item.label }}</span>
+       :class="{{ collapsed }} && 'justify-center px-0'"
+       :title="{{ collapsed }} ? '{{ item.label }}' : null">
+      <span class="h-[18px] w-[18px] shrink-0" aria-hidden="true">{{ item.icon | safe }}</span>
+      <span x-show="!{{ collapsed }}" x-transition.opacity class="truncate">{{ item.label }}</span>
     </a>
     {% endif %}
   {% endfor %}
-</nav>
+</div>
 {% endmacro %}
 
 
 {# ==========================================================================
-   Tabbar · 多页签栏
-   参数：
-     tabs - [{ label, href, active, closable }]
+   CommandPalette · 快捷导航（⌘K）
+   数据源：页面内的 #ada-nav-index JSON 脚本
+   状态由 adminLayout() 提供（paletteOpen / paletteQuery / paletteIndex）
    ========================================================================== #}
-{% macro tabbar(tabs=[]) %}
-<div class="flex h-tabbar shrink-0 items-stretch border-b border-border bg-surface-hover" role="tablist">
-  {% for tab in tabs %}
-  <a href="{{ tab.href | safe }}"
-     class="tab-item {% if tab.active %}tab-item-active{% endif %}"
-     role="tab"
-     {% if tab.active %}aria-selected="true"{% else %}aria-selected="false"{% endif %}>
-    <span>{{ tab.label }}</span>
-    {% if tab.closable %}
-    <span class="ml-1 inline-flex h-4 w-4 items-center justify-center rounded-sm text-content-muted transition-colors duration-fast hover:bg-surface-active hover:text-content"
-          aria-label="关闭标签">
-      <svg class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-        <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"/>
+{% macro command_palette() %}
+<div x-show="paletteOpen" x-cloak
+     class="fixed inset-0 z-[80] flex items-start justify-center p-4 pt-[10vh]"
+     role="dialog" aria-modal="true" aria-label="快捷导航"
+     @keydown.escape.window="closePalette()">
+  <div class="absolute inset-0 bg-black/30 backdrop-blur-[2px] animate-fade-in" @click="closePalette()"></div>
+
+  <div class="relative w-full max-w-xl animate-scale-in overflow-hidden rounded-xl border border-border bg-surface shadow-xl">
+    {# 搜索输入 #}
+    <div class="flex items-center gap-3 border-b border-border px-4">
+      <svg class="h-4 w-4 shrink-0 text-content-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="7.5"/><path d="m20 20-3.5-3.5"/>
       </svg>
-    </span>
-    {% endif %}
-  </a>
-  {% endfor %}
+      <input type="text" x-ref="paletteInput" x-model="paletteQuery"
+             @input="paletteIndex = 0"
+             @keydown.arrow-down.prevent="movePalette(1)"
+             @keydown.arrow-up.prevent="movePalette(-1)"
+             @keydown.enter.prevent="runPalette()"
+             placeholder="搜索页面、设置与操作…"
+             aria-label="搜索页面"
+             class="h-12 flex-1 bg-transparent text-sm text-content outline-none placeholder:text-content-muted">
+      <kbd class="shrink-0 rounded border border-border bg-surface-hover px-1.5 py-0.5 text-2xs font-medium text-content-muted">ESC</kbd>
+    </div>
+
+    {# 结果列表 #}
+    <ul class="max-h-80 overflow-y-auto p-2" role="listbox" aria-label="跳转结果">
+      <template x-for="(item, i) in paletteResults" :key="item.href">
+        <li role="option" :aria-selected="i === paletteIndex">
+          <button type="button" @click="goPalette(item)" @mouseenter="paletteIndex = i"
+                  class="flex w-full items-center gap-2.5 rounded-md px-3 py-2.5 text-left text-sm transition-colors duration-fast"
+                  :class="i === paletteIndex ? 'bg-primary-subtle text-primary' : 'text-content-secondary'">
+            <svg class="h-4 w-4 shrink-0 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M9 18l6-6-6-6"/>
+            </svg>
+            <span class="flex-1 truncate" x-text="item.label"></span>
+            <span x-show="item.group" class="shrink-0 text-2xs text-content-muted" x-text="item.group"></span>
+          </button>
+        </li>
+      </template>
+      <li x-show="paletteResults.length === 0" class="px-3 py-10 text-center text-sm text-content-muted">
+        没有匹配的页面，试试其他关键词
+      </li>
+    </ul>
+
+    {# 底部提示 #}
+    <div class="flex items-center gap-4 border-t border-border bg-surface-inset px-4 py-2 text-2xs text-content-muted">
+      <span class="flex items-center gap-1">
+        <kbd class="rounded border border-border bg-surface px-1 py-px font-medium">↑</kbd>
+        <kbd class="rounded border border-border bg-surface px-1 py-px font-medium">↓</kbd>
+        选择
+      </span>
+      <span class="flex items-center gap-1">
+        <kbd class="rounded border border-border bg-surface px-1 py-px font-medium">↵</kbd>
+        打开
+      </span>
+      <span class="ml-auto tabular">共 <span x-text="paletteItems.length"></span> 个页面</span>
+    </div>
+  </div>
 </div>
 {% endmacro %}

@@ -1,15 +1,22 @@
 {% extends "base.html" %}
 
+{% import "components/card.html" as card %}
+{% import "components/todo_list.html" as todo_list %}
+
 {% block content %}
 <div class="space-y-6">
+  {# 页面头 #}
   <div>
-    <h1 class="text-2xl font-bold tracking-tight text-slate-900">服务端渲染待办清单</h1>
-    <p class="mt-2 text-sm text-slate-500">
-      首屏由 Rust 服务端渲染，交互由 Alpine.js 接管，数据通过 JSON API 增量更新。
+    <p class="label-caps">SSR · 渐进增强</p>
+    <h1 class="mt-2 text-2xl font-semibold tracking-tight text-content">服务端渲染待办清单</h1>
+    <p class="mt-2 max-w-xl text-sm leading-6 text-content-muted">
+      首屏由 Rust 服务端完整渲染，交互由 Alpine.js 接管，数据通过 JSON API 增量更新。
+      整个过程无需前端构建工具链。
     </p>
   </div>
 
-  {% import "components/todo_list.html" as todo_list %}
-  {{ todo_list.render(todos=todos) }}
+  {% call card.render("我的待办", "输入后回车即可添加") %}
+    {{ todo_list.render(todos=todos) }}
+  {% endcall %}
 </div>
 {% endblock %}

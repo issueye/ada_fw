@@ -2,24 +2,29 @@
 
 {% import "components/data.html" as data %}
 {% import "components/display.html" as display %}
+{% import "components/page.html" as page %}
 {% import "components/button.html" as button %}
 {% import "components/input.html" as input %}
 {% import "components/form-controls.html" as fc %}
 
 {% block content %}
-<div class="space-y-6">
-  <div>
-    <h1 class="text-2xl font-semibold tracking-tight text-content">表单示例</h1>
-    <p class="mt-1 text-sm text-content-secondary">展示表单组件的各种用法与校验状态。</p>
-  </div>
+<div class="space-y-5">
 
-  <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-    {# 基础表单 #}
-    {% call data.render(title="基础表单", subtitle="包含各类输入控件") %}
+  {# ==================== 页面头 ==================== #}
+  {{ page.header(
+    title="表单示例",
+    description="各类输入控件、校验状态与选择控件的标准用法。",
+    actions=button.render(label="查看规范", variant="outline", icon='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>')
+  ) }}
+
+  <div class="grid grid-cols-1 gap-5 lg:grid-cols-2">
+
+    {# ==================== 基础表单 ==================== #}
+    {% call data.render(title="基础表单", subtitle="包含各类输入控件与辅助说明") %}
     {% call data.group() %}
-      {{ input.render(name="username", label="用户名", placeholder="请输入用户名", required=true, hint="4-20 个字符，支持字母数字下划线") }}
+      {{ input.render(name="username", label="用户名", placeholder="请输入用户名", required=true, hint="4-20 个字符，支持字母、数字与下划线") }}
       {{ input.render(name="email", label="邮箱", type="email", placeholder="name@example.com", required=true) }}
-      {{ input.render(name="password", label="密码", type="password", placeholder="请输入密码", required=true, hint="至少 8 位，包含大小写字母与数字") }}
+      {{ input.render(name="password", label="密码", type="password", placeholder="请输入密码", required=true, hint="至少 8 位，需包含大小写字母与数字") }}
       {{ input.textarea(name="bio", label="个人简介", placeholder="简单介绍一下自己…", rows=3, hint="最多 200 字") }}
       {{ input.select(
         name="department",
@@ -39,8 +44,8 @@
     {% endcall %}
     {% endcall %}
 
-    {# 校验状态 #}
-    {% call data.render(title="校验状态", subtitle="错误态与禁用态") %}
+    {# ==================== 校验与状态 ==================== #}
+    {% call data.render(title="校验状态", subtitle="错误态、禁用态与正常态") %}
     {% call data.group() %}
       {{ input.render(name="err1", label="邮箱（错误态）", value="invalid-email", error="邮箱格式不正确，请检查后重试") }}
       {{ input.render(name="err2", label="用户名（错误态）", value="ab", error="用户名至少需要 4 个字符") }}
@@ -50,18 +55,18 @@
     {% endcall %}
   </div>
 
-  {# 选择控件 #}
-  {% call data.render(title="选择控件", subtitle="复选框、单选框、开关") %}
+  {# ==================== 选择控件 ==================== #}
+  {% call data.render(title="选择控件", subtitle="复选框、单选框与开关") %}
   <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
     <div class="space-y-4">
-      <p class="text-sm font-medium text-content">复选框</p>
+      <p class="label-caps">复选框</p>
       {{ fc.checkbox(name="cb1", label="接收邮件通知", checked=true) }}
       {{ fc.checkbox(name="cb2", label="接收短信通知", hint="仅在重要事件时发送") }}
       {{ fc.checkbox(name="cb3", label="已禁用选项", disabled=true) }}
     </div>
 
     <div class="space-y-4">
-      <p class="text-sm font-medium text-content">单选框</p>
+      <p class="label-caps">单选框</p>
       {{ fc.radio(
         name="priority",
         options=[
@@ -74,7 +79,7 @@
     </div>
 
     <div class="space-y-4">
-      <p class="text-sm font-medium text-content">开关</p>
+      <p class="label-caps">开关</p>
       {{ fc.switch(name="sw1", label="启用双因素认证", checked=true, hint="提升账号安全性") }}
       {{ fc.switch(name="sw2", label="公开个人资料", hint="其他用户可查看") }}
       {{ fc.switch(name="sw3", label="已禁用开关", disabled=true) }}
@@ -82,9 +87,9 @@
   </div>
   {% endcall %}
 
-  {# 提示条 #}
-  {% call data.render(title="提示条", subtitle="四种语义变体") %}
-  <div class="space-y-3">
+  {# ==================== 提示条 ==================== #}
+  {% call data.render(title="提示条", subtitle="四种语义变体，用于页面级反馈") %}
+  <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
     {% call display.alert(title="信息提示", variant="info") %}
       系统将于今晚 23:00 进行例行维护，预计持续 30 分钟。
     {% endcall %}
@@ -99,5 +104,6 @@
     {% endcall %}
   </div>
   {% endcall %}
+
 </div>
 {% endblock %}

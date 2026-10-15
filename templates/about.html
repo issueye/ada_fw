@@ -1,24 +1,44 @@
 {% extends "base.html" %}
 
+{% import "components/card.html" as card %}
+
 {% block content %}
 <div class="space-y-6">
-  <h1 class="text-2xl font-bold tracking-tight text-slate-900">关于 Ada Framework</h1>
+  <div>
+    <p class="label-caps">关于</p>
+    <h1 class="mt-2 text-2xl font-semibold tracking-tight text-content">关于 Ada Framework</h1>
+    <p class="mt-2 max-w-xl text-sm leading-6 text-content-muted">
+      一套以服务端渲染为默认、按需渐进增强的全栈前端方案，
+      由 Rust 提供渲染与数据能力，浏览器只承担交互。
+    </p>
+  </div>
 
-  {% import "components/card.html" as card %}
-  {% call card.render("技术栈", "服务端渲染 + 渐进增强") %}
-    <ul class="list-disc space-y-1 pl-5 text-sm text-slate-600">
-      <li><strong>Rust + Axum</strong>：高性能异步 HTTP 服务</li>
-      <li><strong>Minijinja</strong>：运行时模板引擎，支持继承与宏</li>
-      <li><strong>Tailwind CSS</strong>：原子化样式，开发期 CDN、生产期本地构建</li>
-      <li><strong>Alpine.js</strong>：声明式交互，无需前端构建工具链</li>
-    </ul>
+  {% call card.render("技术选型", "每一项都以「减少运行时复杂度」为前提") %}
+  <dl class="divide-y divide-border">
+    <div class="flex flex-col gap-1 py-3 first:pt-0 sm:flex-row sm:gap-6">
+      <dt class="w-40 shrink-0 text-sm font-medium text-content">Rust + Axum</dt>
+      <dd class="text-sm leading-6 text-content-secondary">高性能异步 HTTP 服务，统一的类型与错误处理。</dd>
+    </div>
+    <div class="flex flex-col gap-1 py-3 sm:flex-row sm:gap-6">
+      <dt class="w-40 shrink-0 text-sm font-medium text-content">Minijinja</dt>
+      <dd class="text-sm leading-6 text-content-secondary">运行时模板引擎，支持继承与宏，模板改动无需重新编译。</dd>
+    </div>
+    <div class="flex flex-col gap-1 py-3 sm:flex-row sm:gap-6">
+      <dt class="w-40 shrink-0 text-sm font-medium text-content">Tailwind CSS</dt>
+      <dd class="text-sm leading-6 text-content-secondary">语义令牌驱动，开发期走 CDN、生产期走本地构建产物。</dd>
+    </div>
+    <div class="flex flex-col gap-1 py-3 pb-0 sm:flex-row sm:gap-6">
+      <dt class="w-40 shrink-0 text-sm font-medium text-content">Alpine.js</dt>
+      <dd class="text-sm leading-6 text-content-secondary">声明式交互，无需独立的前端构建与状态管理库。</dd>
+    </div>
+  </dl>
   {% endcall %}
 
   {% call card.render("设计理念", "SSR 优先 · 组件化 · 渐进增强") %}
-    <p class="text-sm text-slate-600">
-      页面由可复用的组件模板组合而成，首屏完整渲染保证 SEO 与加载速度，
-      客户端交互按需增强，前后端职责清晰。
-    </p>
+  <p class="text-sm leading-6 text-content-secondary">
+    页面由可复用组件模板组合而成。首屏完整渲染，保证可访问性与加载速度；
+    客户端交互按需增强，脚本加载失败也不影响内容的可读性。
+  </p>
   {% endcall %}
 </div>
 {% endblock %}

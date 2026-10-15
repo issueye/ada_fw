@@ -1,6 +1,6 @@
 /* ==========================================================================
    Ada Design System · 组件层（纯 CSS）
-   风格：企业级管理后台（细边框、小圆角、弱阴影）
+   风格：现代 SaaS 中后台（hairline 边框 + 分层柔和阴影 + 克制圆角）
 
    说明：本文件为**纯 CSS**，不依赖 Tailwind 指令，
    因此可同时用于：
@@ -8,18 +8,29 @@
    - CDN 模式：由 tokens.html 直接内联到 <style>
    ========================================================================== */
 
-/* ---- 焦点环 ---- */
+/* ---- 焦点环：仅键盘可见，用柔和主色投影 ---- */
 .focus-ring:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px var(--color-surface),
-    0 0 0 4px color-mix(in srgb, var(--color-primary) 30%, transparent);
+  box-shadow: 0 0 0 2px var(--color-surface), 0 0 0 4px var(--color-primary-ring);
 }
 
-/* ---- 卡片：细边框 + 小圆角，几乎无阴影 ---- */
+/* ---- 卡片：hairline 边框 + 极轻投影，悬停不动，避免"满屏漂浮" ---- */
 .card {
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   border: 1px solid var(--color-border);
   background-color: var(--color-surface);
+  box-shadow: var(--shadow-xs);
+}
+
+/* ---- 可交互卡片：悬停时边框与投影同步加深 ---- */
+.card-interactive {
+  transition: border-color var(--duration-base) var(--ease-out),
+    box-shadow var(--duration-base) var(--ease-out),
+    transform var(--duration-base) var(--ease-out);
+}
+.card-interactive:hover {
+  border-color: var(--color-border-strong);
+  box-shadow: var(--shadow-md);
 }
 
 /* ---- 表单控件基础 ---- */
@@ -32,69 +43,100 @@
   padding-right: 12px;
   font-size: 14px;
   color: var(--color-text);
-  transition: border-color var(--duration-base), box-shadow var(--duration-base);
+  transition: border-color var(--duration-base) var(--ease-out),
+    box-shadow var(--duration-base) var(--ease-out),
+    background-color var(--duration-base) var(--ease-out);
 }
 .field-base::placeholder {
   color: var(--color-text-muted);
 }
+.field-base:hover:not(:disabled):not(:focus) {
+  border-color: var(--color-text-muted);
+}
 .field-base:focus {
   border-color: var(--color-primary);
   outline: none;
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 15%, transparent);
+  box-shadow: 0 0 0 3px var(--color-primary-ring);
 }
 .field-base:disabled {
   cursor: not-allowed;
-  opacity: 0.5;
+  background-color: var(--color-surface-inset);
+  color: var(--color-text-muted);
 }
 
-/* ---- 表格：表头浅灰底、行分隔线、紧凑行高 ---- */
+/* ---- 表格：hairline 行线 + 弱表头底，行悬停整行高亮 ---- */
 .table-base {
   width: 100%;
   border-collapse: collapse;
   font-size: 14px;
 }
 .table-base thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
   border-bottom: 1px solid var(--color-border);
-  background-color: var(--color-surface-hover);
-  padding: 10px 12px;
+  background-color: var(--color-surface-inset);
+  padding: 8px 16px;
   text-align: left;
   font-size: 12px;
-  font-weight: 500;
-  color: var(--color-text-secondary);
+  line-height: 18px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  white-space: nowrap;
 }
 .table-base tbody td {
   border-bottom: 1px solid var(--color-border);
-  padding: 10px 12px;
+  padding: 12px 16px;
   color: var(--color-text);
+  vertical-align: middle;
+}
+.table-base tbody tr:last-child td {
+  border-bottom: 0;
 }
 .table-base tbody tr {
-  transition: background-color var(--duration-fast);
+  transition: background-color var(--duration-fast) var(--ease-out);
 }
 .table-base tbody tr:hover {
   background-color: var(--color-surface-hover);
 }
 
-/* ---- 顶栏：整条铺满主色 ---- */
+/* ---- 顶栏：中性白 + hairline 下边框，不用高饱和大色块 ---- */
 .topbar {
   display: flex;
   height: var(--topbar-height);
   flex-shrink: 0;
   align-items: center;
+  border-bottom: 1px solid var(--color-border);
   background-color: var(--color-topbar-bg);
   color: var(--color-topbar-fg);
+  /* 内容滚动时顶栏保持不透明，避免文字穿透 */
+  position: relative;
+  z-index: 40;
 }
 
-/* ---- 侧边栏菜单项：选中态浅蓝底 + 左侧蓝色竖条 ---- */
+/* ---- 侧边栏 ---- */
+.sidebar {
+  display: flex;
+  flex-shrink: 0;
+  flex-direction: column;
+  border-right: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  transition: width var(--duration-base) var(--ease-out);
+}
+
+/* ---- 菜单项：圆角药丸激活态，不再使用左侧竖条 ---- */
 .menu-item {
   position: relative;
   display: flex;
   align-items: center;
   gap: 10px;
-  border-radius: var(--radius-sm);
-  padding: 8px 12px;
-  font-size: 14px;
+  border-radius: var(--radius-md);
+  padding: 7px 10px;
+  font-size: 13.5px;
+  line-height: 20px;
   color: var(--color-text-secondary);
-  transition: background-color var(--duration-fast), color var(--duration-fast);
+  transition: background-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
 }
 .menu-item:hover {
   background-color: var(--color-surface-hover);
@@ -109,59 +151,89 @@
   background-color: var(--color-primary-subtle);
   color: var(--color-primary);
 }
-.menu-item-active::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  height: 100%;
-  width: 2px;
-  background-color: var(--color-primary);
+
+/* ---- 侧边栏分组标签 ---- */
+.menu-group-label {
+  padding: 0 10px;
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
 }
 
-/* ---- 标签页（多页签） ---- */
+/* ---- 分段控件（视图切换） ----
+   .segmented 为容器，.tab-item 为分段项；激活项为悬浮白底药丸。 */
+.segmented {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-active);
+  padding: 3px;
+}
 .tab-item {
   display: inline-flex;
-  height: var(--tabbar-height);
+  height: calc(var(--tabbar-height) - 6px);
   align-items: center;
-  gap: 8px;
-  border-right: 1px solid var(--color-border);
+  gap: 6px;
+  border-radius: var(--radius-sm);
   padding: 0 12px;
-  font-size: 14px;
+  font-size: 13px;
+  line-height: 1;
   color: var(--color-text-secondary);
-  transition: background-color var(--duration-fast), color var(--duration-fast);
+  transition: background-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
 }
 .tab-item:hover {
-  background-color: var(--color-surface-hover);
   color: var(--color-text);
 }
 .tab-item-active {
   background-color: var(--color-surface);
   font-weight: 500;
-  color: var(--color-primary);
+  color: var(--color-text);
+  box-shadow: var(--shadow-xs);
 }
 .tab-item-active:hover {
-  background-color: var(--color-surface);
-  color: var(--color-primary);
+  color: var(--color-text);
 }
 
-/* ---- 统计卡：浅色底 + 大号数字 ---- */
+/* ---- 指标卡：白底 + 图标色块，靠数据本身制造色彩而非整卡铺色 ---- */
 .stat-card {
   position: relative;
-  overflow: hidden;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   border: 1px solid var(--color-border);
-  padding: 12px 16px;
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-xs);
+  padding: 16px;
+  transition: border-color var(--duration-base) var(--ease-out),
+    box-shadow var(--duration-base) var(--ease-out);
+}
+.stat-card:hover {
+  border-color: var(--color-border-strong);
+  box-shadow: var(--shadow-sm);
 }
 .stat-card-label {
   font-size: 12px;
+  line-height: 18px;
   color: var(--color-text-secondary);
 }
 .stat-card-value {
-  margin-top: 4px;
-  font-size: 24px;
+  margin-top: 6px;
+  font-size: 26px;
+  line-height: 32px;
   font-weight: 600;
+  letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+}
+
+/* ---- 图表容器 ---- */
+.chart-grid-line {
+  stroke: var(--color-border);
+  stroke-width: 1;
 }
 
 /* ---- 骨架屏微光 ---- */
@@ -177,10 +249,10 @@
   background: linear-gradient(
     90deg,
     transparent,
-    rgb(255 255 255 / 0.15),
+    color-mix(in srgb, var(--color-text) 7%, transparent),
     transparent
   );
-  animation: shimmer 1.5s infinite;
+  animation: shimmer 1.4s infinite;
 }
 @keyframes shimmer {
   100% {
@@ -195,4 +267,12 @@
 }
 .scrollbar-none::-webkit-scrollbar {
   display: none;
+}
+
+/* ---- 内容区纵向滚动时顶部出现的柔和高光，暗示"还有内容" ---- */
+.scroll-edge {
+  background:
+    linear-gradient(var(--color-bg) 30%, rgb(0 0 0 / 0)) top / 100% 12px no-repeat,
+    linear-gradient(rgb(0 0 0 / 0), var(--color-bg) 70%) bottom / 100% 12px no-repeat;
+  background-attachment: local, local;
 }
