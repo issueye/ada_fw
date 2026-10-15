@@ -3,10 +3,12 @@
 //! 负责组装后台页面上下文并调用布局模板渲染。
 
 use axum::extract::State;
-use axum::response::Html;
+use axum::response::{Html, IntoResponse};
+use axum::Json;
+use axum_extra::extract::cookie::{Cookie, CookieJar, SameSite};
 use serde::Serialize;
 
-use crate::error::AppResult;
+use crate::error::{AppError, AppResult};
 use crate::models::{User, UserStatus};
 use crate::state::AppState;
 
@@ -314,16 +316,135 @@ pub async fn login(State(state): State<AppState>) -> AppResult<Html<String>> {
     Ok(Html(html))
 }
 
+/// 登录请求体。
+#[derive(serde::Deserialize)]
+pub struct LoginForm {
+    /// 邮箱。
+    pub email: String,
+    /// 密码。
+    pub password: String,
+}
+
+/// `POST /admin/login` —— 校验凭据并签发 JWT Cookie。
+///
+/// 演示实现：任意非空邮箱 + 密码长度 ≥ 6 即视为合法。
+/// 生产环境应替换为数据库查询 + 密码哈希校验（如 `argon2`）。
+pub async fn do_login(
+    State(state): State<AppState>,
+    jar: CookieJar,
+    Json(form): Json<LoginForm>,
+) -> AppResult<impl IntoResponse> {
+    let email = form.email.trim();
+    let password = form.password.trim();
+
+    // 统一错误提示，避免用户枚举。
+    let invalid = || AppError::Unauthorized("邮箱或密码错误".to_string());
+
+    if email.is_empty() || !email.contains('@') {
+        return Err(invalid());
+    }
+    if password.len() < 6 {
+        return Err(invalid());
+    }
+
+    // 从存储中按邮箱查找用户，决定角色；找不到则按访客处理。
+    let (user_id, name, role) = {
+        let store = state.store.read();
+        store
+            .list_users()
+            .into_iter()
+            .find(|u| u.email.eq_ignore_ascii_case(email))
+            .map(|u| (u.id, u.name, u.role.label().to_string()))
+            .unwrap_or_else(|| (email.to_string(), email.to_string(), "访客".to_string()))
+    };
+
+    let token = crate::auth::issue_token(
+        &state.config.jwt_secret,
+        &user_id,
+        &name,
+        &role,
+        state.config.jwt_ttl_secs,
+    )?;
+
+    let cookie = Cookie::build((crate::auth::TOKEN_COOKIE, token))
+        .http_only(true)
+        .same_site(SameSite::Lax)
+        .path("/")
+        .max_age(time::Duration::seconds(state.config.jwt_ttl_secs as i64))
+        .build();
+
+    let jar = jar.add(cookie);
+    Ok((jar, Json(serde_json::json!({ "ok": true }))))
+}
+
+/// `POST /admin/logout` —— 清除登录 Cookie。
+pub async fn do_logout(jar: CookieJar) -> impl IntoResponse {
+    let jar = jar.remove(Cookie::from(crate::auth::TOKEN_COOKIE));
+    (jar, Json(serde_json::json!({ "ok": true })))
+}
+
 /// `GET /admin/404` —— 404 页（独立布局）。
 pub async fn not_found_page(State(state): State<AppState>) -> AppResult<Html<String>> {
+    let html = render_not_found(&state)?;
+    Ok(Html(html))
+}
+
+/// 全局兜底处理器：任意未匹配路径均渲染 404 页并返回 `404` 状态码。
+pub async fn fallback(State(state): State<AppState>) -> impl axum::response::IntoResponse {
+    match render_not_found(&state) {
+        Ok(html) => (axum::http::StatusCode::NOT_FOUND, Html(html)).into_response(),
+        // 404 页自身渲染失败时降级为纯文本，避免二次错误。
+        Err(err) => {
+            tracing::error!(error = %err, "渲染 404 页面失败");
+            (
+                axum::http::StatusCode::NOT_FOUND,
+                "404 Not Found",
+            )
+                .into_response()
+        }
+    }
+}
+
+/// 渲染 404 页面 HTML。
+fn render_not_found(state: &AppState) -> AppResult<String> {
     #[derive(Serialize)]
     struct NotFoundContext {
         title: &'static str,
     }
 
-    let html = state.engine.render(
+    state.engine.render(
         "admin/404.html",
         NotFoundContext { title: "页面不存在" },
-    )?;
-    Ok(Html(html))
+    )
+}
+
+/// 渲染通用错误页 HTML（复用 404 模板，展示状态码与提示）。
+pub fn render_error_page(state: &AppState, status: u16, message: &str) -> AppResult<String> {
+    #[derive(Serialize)]
+    struct ErrorContext {
+        title: String,
+        status: u16,
+        heading: String,
+        message: String,
+    }
+
+    let heading = match status {
+        400 => "请求参数有误",
+        401 => "需要登录",
+        403 => "没有访问权限",
+        404 => "页面不存在",
+        413 => "请求内容过大",
+        500 => "服务器内部错误",
+        _ => "出错了",
+    };
+
+    state.engine.render(
+        "admin/404.html",
+        ErrorContext {
+            title: format!("{status} 错误"),
+            status,
+            heading: heading.to_string(),
+            message: message.to_string(),
+        },
+    )
 }

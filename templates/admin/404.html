@@ -26,14 +26,14 @@
 <body class="min-h-screen bg-bg text-content">
   <div class="flex min-h-screen flex-col items-center justify-center px-4 py-12">
     <div class="w-full max-w-md text-center">
-      {# 404 图形 #}
+      {# 状态码图形 #}
       <div class="mb-8">
-        <p class="select-none text-8xl font-bold tracking-tighter text-primary/20">404</p>
+        <p class="select-none text-8xl font-bold tracking-tighter text-primary/20">{{ status | default(404) }}</p>
       </div>
 
-      <h1 class="text-2xl font-semibold tracking-tight text-content">页面不存在</h1>
+      <h1 class="text-2xl font-semibold tracking-tight text-content">{{ heading | default("页面不存在") }}</h1>
       <p class="mt-2 text-sm text-content-secondary">
-        抱歉，你访问的页面已被移除、重命名，或暂时不可用。
+        {{ message | default("抱歉，你访问的页面已被移除、重命名，或暂时不可用。") }}
       </p>
 
       <div class="mt-8 flex flex-wrap items-center justify-center gap-3">

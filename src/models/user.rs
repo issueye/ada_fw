@@ -124,6 +124,33 @@ impl User {
             initial,
         }
     }
+
+    /// 从持久化数据恢复用户（保留原 id，并重建派生字段）。
+    pub fn restore(
+        id: impl Into<String>,
+        name: impl Into<String>,
+        email: impl Into<String>,
+        role: UserRole,
+        status: UserStatus,
+        created_at: impl Into<String>,
+    ) -> Self {
+        let name = name.into();
+        let initial = name.chars().next().map(|c| c.to_string()).unwrap_or_default();
+
+        Self {
+            id: id.into(),
+            name,
+            email: email.into(),
+            role,
+            status,
+            created_at: created_at.into(),
+            role_label: role.label().to_string(),
+            role_variant: role.variant().to_string(),
+            status_label: status.label().to_string(),
+            status_variant: status.variant().to_string(),
+            initial,
+        }
+    }
 }
 
 /// 创建用户的请求体。

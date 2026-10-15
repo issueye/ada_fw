@@ -6,6 +6,11 @@
 /node_modules
 /static/css/app.css
 
+# 数据库（运行时生成）
+*.db
+*.db-shm
+*.db-wal
+
 # 编辑器
 .vscode/
 .idea/

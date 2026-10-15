@@ -12,7 +12,7 @@ use crate::models::{Todo, User, UserRole, UserStatus};
 use crate::template::TemplateEngine;
 
 /// 内存数据存储（示例用，生产环境可替换为数据库连接池）。
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct Store {
     todos: Vec<Todo>,
     users: Vec<User>,
@@ -76,6 +76,16 @@ impl Store {
         self.todos.clone()
     }
 
+    /// 直接推入一个已构造的待办（用于从数据库恢复）。
+    pub fn push_todo(&mut self, todo: Todo) {
+        self.todos.push(todo);
+    }
+
+    /// 直接推入一个已构造的用户（用于从数据库恢复）。
+    pub fn push_user(&mut self, user: User) {
+        self.users.push(user);
+    }
+
     /// 新增一条待办，返回其副本。
     pub fn add(&mut self, title: impl Into<String>) -> Todo {
         let todo = Todo::new(title);
@@ -107,15 +117,43 @@ pub struct AppState {
     pub engine: TemplateEngine,
     /// 数据存储。
     pub store: Arc<RwLock<Store>>,
+    /// 数据库连接池（未启用持久化时为 `None`）。
+    pub pool: Option<sqlx::SqlitePool>,
 }
 
 impl AppState {
-    /// 构建应用状态。
+    /// 构建应用状态（无持久化）。
     pub fn new(config: AppConfig, engine: TemplateEngine) -> Self {
         Self {
             config: Arc::new(config),
             engine,
             store: Arc::new(RwLock::new(Store::with_seed())),
+            pool: None,
+        }
+    }
+
+    /// 构建带持久化的应用状态。
+    pub fn with_pool(
+        config: AppConfig,
+        engine: TemplateEngine,
+        store: Store,
+        pool: sqlx::SqlitePool,
+    ) -> Self {
+        Self {
+            config: Arc::new(config),
+            engine,
+            store: Arc::new(RwLock::new(store)),
+            pool: Some(pool),
+        }
+    }
+
+    /// 将当前内存数据异步落库（未启用持久化时为空操作）。
+    pub async fn persist(&self) {
+        if let Some(pool) = &self.pool {
+            let snapshot = self.store.read().clone();
+            if let Err(e) = crate::db::save_store(pool, &snapshot).await {
+                tracing::error!(error = %e, "数据落库失败");
+            }
         }
     }
 }

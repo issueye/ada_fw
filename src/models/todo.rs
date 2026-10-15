@@ -23,6 +23,15 @@ impl Todo {
             done: false,
         }
     }
+
+    /// 从持久化数据恢复一条待办（保留原 id 与完成状态）。
+    pub fn restore(id: impl Into<String>, title: impl Into<String>, done: bool) -> Self {
+        Self {
+            id: id.into(),
+            title: title.into(),
+            done,
+        }
+    }
 }
 
 /// 创建待办的请求体。

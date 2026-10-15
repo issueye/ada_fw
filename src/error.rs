@@ -20,6 +20,10 @@ pub enum AppError {
     #[error("请求参数非法: {0}")]
     BadRequest(String),
 
+    /// 未认证或凭据无效。
+    #[error("未认证: {0}")]
+    Unauthorized(String),
+
     /// 服务端内部错误。
     #[error("服务端内部错误: {0}")]
     Internal(String),
@@ -32,6 +36,7 @@ impl AppError {
             AppError::Template(_) | AppError::Internal(_) => StatusCode::INTERNAL_SERVER_ERROR,
             AppError::NotFound => StatusCode::NOT_FOUND,
             AppError::BadRequest(_) => StatusCode::BAD_REQUEST,
+            AppError::Unauthorized(_) => StatusCode::UNAUTHORIZED,
         }
     }
 }

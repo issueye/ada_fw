@@ -16,6 +16,10 @@
 - **数据分层**：页面走 HTML，动态数据走 `/api/*` JSON 接口
 - **Tailwind 双模式**：开发期 CDN、生产期本地构建，一键切换
 - **后台模板**：侧边栏布局 + 6 个完整页面（仪表盘/用户/表单/设置/登录/404）
+- **JWT 鉴权**：HttpOnly Cookie + 无状态 Token，页面重定向 / API 401
+- **数据持久化**：可选 SQLite（sqlx），未配置时纯内存运行
+- **模板热重载**：开发模式监听 `templates/` 变更，改完即生效
+- **安全加固**：安全响应头、请求体限制、错误响应内容协商
 
 ---
 
@@ -38,6 +42,8 @@ cargo run
 cargo test
 ```
 
+共 **73 个测试**：44 单元测试 + 20 HTTP 集成测试 + 9 模板渲染冒烟测试。
+
 ---
 
 ## 文档
@@ -54,20 +60,28 @@ cargo test
 ```
 ada_fw/
 ├── docs/UED.md                  # UED 设计规范
+├── docs/ROADMAP.md              # 下阶段开发计划
 ├── ARCHITECTURE.md              # 架构设计文档
+├── migrations/                  # SQLite 迁移脚本
 ├── src/
 │   ├── main.rs                  # 入口
 │   ├── lib.rs                   # 库导出与状态初始化
 │   ├── config.rs                # 配置层
 │   ├── state.rs                 # 共享状态与数据存储
 │   ├── error.rs                 # 统一错误类型
+│   ├── middleware.rs            # 错误响应内容协商
 │   ├── router.rs                # 路由注册
+│   ├── auth/                    # JWT 鉴权与中间件
+│   ├── db/                      # sqlx + SQLite 持久化
 │   ├── template/                # 模板引擎与组件注册表
 │   ├── handlers/
 │   │   ├── pages.rs             # 示例页面
-│   │   ├── admin.rs             # 后台页面
+│   │   ├── admin.rs             # 后台页面与登录
 │   │   └── api.rs               # JSON API
 │   └── models/                  # 领域模型（Todo / User）
+├── tests/
+│   ├── http.rs                  # HTTP 集成测试
+│   └── template_render.rs       # 模板渲染冒烟测试
 ├── templates/
 │   ├── layouts/admin.html       # 后台布局（模板继承）
 │   ├── admin/                   # 后台页面
@@ -208,6 +222,8 @@ ada_fw/
 | `GET` | `/admin/settings` | 设置 |
 | `GET` | `/admin/ui-kit` | 组件库 |
 | `GET` | `/admin/login` | 登录页 |
+| `POST` | `/admin/login` | 登录（签发 JWT Cookie） |
+| `POST` | `/admin/logout` | 登出（清除 Cookie） |
 | `GET` | `/admin/404` | 404 页 |
 | `GET` `POST` | `/api/todos` | 待办列表 / 新建 |
 | `DELETE` | `/api/todos/:id` | 删除待办 |
@@ -215,6 +231,7 @@ ada_fw/
 | `GET` `POST` | `/api/users` | 用户列表 / 新建 |
 | `DELETE` | `/api/users/:id` | 删除用户 |
 | `GET` | `/static/*` | 静态资源 |
+| `*` | 其他路径 | 404 页（HTML） |
 
 ---
 
@@ -227,7 +244,72 @@ ada_fw/
 | `ADA_TEMPLATE_DIR` | `templates` | 模板目录 |
 | `ADA_STATIC_DIR` | `static` | 静态资源目录 |
 | `ADA_TAILWIND_MODE` | `cdn` | `cdn` 或 `local` |
-| `ADA_HOT_RELOAD` | `false` | 模板调试信息 |
+| `ADA_HOT_RELOAD` | `false` | 模板热重载（监听 `templates/` 变更） |
+| `ADA_JWT_SECRET` | 开发默认值 | **生产必须注入**，长度 ≥ 16 字符 |
+| `ADA_JWT_TTL_SECS` | `86400` | Token 有效期（秒） |
+| `ADA_AUTH_ENABLED` | `true` | 是否启用鉴权中间件 |
+| `ADA_DATABASE_URL` | 未设置 | 设置后启用 SQLite 持久化，如 `sqlite://ada.db?mode=rwc` |
+
+---
+
+## 鉴权
+
+后台与 API 默认受 **JWT + HttpOnly Cookie** 保护：
+
+| 路径 | 鉴权 |
+| --- | --- |
+| `/`、`/about`、`/admin/login`、`/admin/404`、`/static/*` | 免鉴权 |
+| `/admin`、`/admin/users`、`/admin/forms`、`/admin/settings`、`/admin/ui-kit` | 需登录 |
+| `/api/*` | 需登录 |
+
+**行为约定**：
+
+- 未登录访问页面 → `303` 重定向到 `/admin/login?next=<原路径>`
+- 未登录访问 API → `401` JSON
+- 登录失败统一返回「邮箱或密码错误」，不区分具体原因（防用户枚举）
+- 演示环境：任意合法邮箱 + 密码（≥ 6 位）即可登录
+
+**生产部署**：
+
+```bash
+export ADA_JWT_SECRET="$(openssl rand -hex 32)"
+export ADA_DATABASE_URL="sqlite://ada.db?mode=rwc"
+ADA_TAILWIND_MODE=local cargo run --release
+```
+
+---
+
+## 数据持久化
+
+设置 `ADA_DATABASE_URL` 后启用 SQLite 持久化：
+
+- 启动时执行 `migrations/0001_init.sql` 建表
+- 首次启动（表为空）自动写入种子数据
+- 内存 `Store` 为唯一事实来源，变更后异步落库
+- 未设置该变量时使用纯内存存储（进程重启数据丢失）
+
+---
+
+## ���误响应内容协商
+
+服务端错误按请求期望自动分流：
+
+| 请求 `Accept` | 响应 |
+| --- | --- |
+| 含 `text/html` | 渲染 HTML 错误页（复用 `admin/404.html`） |
+| 其他（如 `application/json`） | 返回 JSON 错误体 |
+
+---
+
+## 安全响应头
+
+所有响应自动附加：
+
+- `X-Content-Type-Options: nosniff`
+- `X-Frame-Options: DENY`
+- `Referrer-Policy: strict-origin-when-cross-origin`
+
+请求体上限 **64 KiB**，超限返回 `413`。
 
 ---
 

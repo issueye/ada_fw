@@ -48,7 +48,20 @@ pub struct AppConfig {
     pub tailwind_mode: TailwindMode,
     /// 是否开启模板热重载（开发模式）。
     pub hot_reload: bool,
+    /// JWT 签名密钥。
+    ///
+    /// 生产环境**必须**通过 `ADA_JWT_SECRET` 注入；未设置时使用开发默认值并告警。
+    pub jwt_secret: String,
+    /// Token 有效期（秒），默认 24 小时。
+    pub jwt_ttl_secs: u64,
+    /// 是否启用鉴权中间件（默认启用）。
+    pub auth_enabled: bool,
+    /// 数据库连接串；为 `None` 时使用纯内存存储。
+    pub database_url: Option<String>,
 }
+
+/// 开发环境默认密钥（仅用于本地调试，生产必须覆盖）。
+pub const DEV_JWT_SECRET: &str = "ada-framework-dev-secret-change-me";
 
 impl Default for AppConfig {
     fn default() -> Self {
@@ -59,6 +72,10 @@ impl Default for AppConfig {
             static_dir: PathBuf::from("static"),
             tailwind_mode: TailwindMode::Cdn,
             hot_reload: false,
+            jwt_secret: DEV_JWT_SECRET.to_string(),
+            jwt_ttl_secs: 24 * 60 * 60,
+            auth_enabled: true,
+            database_url: None,
         }
     }
 }
@@ -96,8 +113,42 @@ impl AppConfig {
         if let Ok(v) = std::env::var("ADA_HOT_RELOAD") {
             cfg.hot_reload = matches!(v.trim().to_ascii_lowercase().as_str(), "1" | "true" | "yes");
         }
+        if let Ok(v) = std::env::var("ADA_JWT_SECRET") {
+            if !v.trim().is_empty() {
+                cfg.jwt_secret = v;
+            }
+        }
+        if let Ok(v) = std::env::var("ADA_JWT_TTL_SECS") {
+            if let Ok(secs) = v.parse() {
+                cfg.jwt_ttl_secs = secs;
+            }
+        }
+        if let Ok(v) = std::env::var("ADA_AUTH_ENABLED") {
+            cfg.auth_enabled = !matches!(v.trim().to_ascii_lowercase().as_str(), "0" | "false" | "no");
+        }
+        if let Ok(v) = std::env::var("ADA_DATABASE_URL") {
+            if !v.trim().is_empty() {
+                cfg.database_url = Some(v);
+            }
+        }
 
         cfg
+    }
+
+    /// 校验配置安全性，返回致命问题列表。
+    ///
+    /// 生产环境（`tailwind_mode == Local` 或显式设置 `ADA_JWT_SECRET`）下
+    /// 若仍使用开发默认密钥，视为致命错误。
+    pub fn validate(&self) -> Result<(), String> {
+        if self.jwt_secret == DEV_JWT_SECRET {
+            tracing::warn!(
+                "正在使用开发默认 JWT 密钥，请在生产环境通过 ADA_JWT_SECRET 注入强随机密钥"
+            );
+        }
+        if self.jwt_secret.len() < 16 {
+            return Err("JWT 密钥长度不足 16 字符，存在被暴力破解风险".to_string());
+        }
+        Ok(())
     }
 
     /// 监听地址字符串，形如 `127.0.0.1:3000`。

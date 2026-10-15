@@ -22,6 +22,7 @@ pub async fn create_todo(
 ) -> AppResult<(StatusCode, Json<Todo>)> {
     let payload = payload.validate().map_err(AppError::BadRequest)?;
     let todo = state.store.write().add(payload.title);
+    state.persist().await;
     Ok((StatusCode::CREATED, Json(todo)))
 }
 
@@ -31,6 +32,7 @@ pub async fn delete_todo(
     Path(id): Path<String>,
 ) -> AppResult<StatusCode> {
     if state.store.write().remove(&id) {
+        state.persist().await;
         Ok(StatusCode::NO_CONTENT)
     } else {
         Err(AppError::NotFound)
@@ -42,12 +44,14 @@ pub async fn toggle_todo(
     State(state): State<AppState>,
     Path(id): Path<String>,
 ) -> AppResult<Json<Todo>> {
-    state
-        .store
-        .write()
-        .toggle(&id)
-        .map(Json)
-        .ok_or(AppError::NotFound)
+    let updated = state.store.write().toggle(&id);
+    match updated {
+        Some(todo) => {
+            state.persist().await;
+            Ok(Json(todo))
+        }
+        None => Err(AppError::NotFound),
+    }
 }
 
 // ==========================================================================
@@ -66,6 +70,7 @@ pub async fn create_user(
 ) -> AppResult<(StatusCode, Json<User>)> {
     let payload = payload.validate().map_err(AppError::BadRequest)?;
     let user = state.store.write().add_user(payload.name, payload.email, payload.role);
+    state.persist().await;
     Ok((StatusCode::CREATED, Json(user)))
 }
 
@@ -75,6 +80,7 @@ pub async fn delete_user(
     Path(id): Path<String>,
 ) -> AppResult<StatusCode> {
     if state.store.write().remove_user(&id) {
+        state.persist().await;
         Ok(StatusCode::NO_CONTENT)
     } else {
         Err(AppError::NotFound)

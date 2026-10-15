@@ -15,6 +15,26 @@ document.addEventListener('alpine:init', () => {
   }
 
   /* ======================================================================
+     公共请求封装
+     统一处理 JSON 头、错误体解析与 204 空响应，供各组件复用。
+     ====================================================================== */
+  async function apiRequest(url, options = {}) {
+    const res = await fetch(url, {
+      headers: { 'Content-Type': 'application/json' },
+      ...options,
+    });
+    if (!res.ok) {
+      let message = `请求失败 (${res.status})`;
+      try {
+        const body = await res.json();
+        message = body?.error?.message || message;
+      } catch (_) { /* 忽略解析错误 */ }
+      throw new Error(message);
+    }
+    return res.status === 204 ? null : res.json();
+  }
+
+  /* ======================================================================
      后台布局：侧边栏折叠 + 主题切换
      ====================================================================== */
   Alpine.data('adminLayout', () => ({
@@ -40,7 +60,6 @@ document.addEventListener('alpine:init', () => {
     },
   }));
 
-  /* ======================================================================
   /* ======================================================================
      全局反馈：Toast + Confirm
      通过 window 事件触发，与调用方解耦：
@@ -77,13 +96,49 @@ document.addEventListener('alpine:init', () => {
   }));
 
   /* ======================================================================
-     用户管理：列表 + 搜索 + 删除
+     用户管理：列表 + 搜索 + 新建 + 删除
      ====================================================================== */
+  Alpine.data('loginForm', () => ({
+    email: '',
+    password: '',
+    error: '',
+    submitting: false,
+
+    async submit() {
+      if (this.submitting) return;
+      this.submitting = true;
+      this.error = '';
+      try {
+        await apiRequest('/admin/login', {
+          method: 'POST',
+          body: JSON.stringify({ email: this.email, password: this.password }),
+        });
+        // 登录成功：跳转到 next 参数指定页，默认 /admin
+        const next = new URLSearchParams(window.location.search).get('next');
+        window.location.href = next && next.startsWith('/') ? next : '/admin';
+      } catch (e) {
+        this.error = e.message;
+      } finally {
+        this.submitting = false;
+      }
+    },
+  }));
+
   Alpine.data('userManager', () => ({
     users: [],
     keyword: '',
     loading: false,
     error: '',
+    /** 当前打开的弹窗 id，null 表示全部关闭。 */
+    openModal: null,
+    /** 新建用户表单。 */
+    form: { name: '', email: '', role: 'viewer' },
+    /** 提交中标记，防止重复提交。 */
+    submitting: false,
+    /** 当前页码（从 1 开始）。 */
+    page: 1,
+    /** 每页条数。 */
+    perPage: 10,
 
     async init() {
       await this.load();
@@ -99,11 +154,42 @@ document.addEventListener('alpine:init', () => {
       );
     },
 
+    /** 总页数（至少 1 页）。 */
+    get totalPages() {
+      return Math.max(1, Math.ceil(this.filtered.length / this.perPage));
+    },
+
+    /** 当前页数据切片。 */
+    get paged() {
+      const start = (this.page - 1) * this.perPage;
+      return this.filtered.slice(start, start + this.perPage);
+    },
+
+    /** 页码列表（最多 5 个，围绕当前页）。 */
+    get pageNumbers() {
+      const total = this.totalPages;
+      let start = Math.max(1, this.page - 2);
+      const end = Math.min(total, start + 4);
+      start = Math.max(1, end - 4);
+      const pages = [];
+      for (let p = start; p <= end; p++) pages.push(p);
+      return pages;
+    },
+
+    /** 搜索关键词变化时回到第一页。 */
+    onSearch() {
+      this.page = 1;
+    },
+
+    goTo(p) {
+      if (p >= 1 && p <= this.totalPages) this.page = p;
+    },
+
     async load() {
       this.loading = true;
       this.error = '';
       try {
-        this.users = await this.request('/api/users');
+        this.users = await apiRequest('/api/users');
       } catch (e) {
         this.error = e.message;
       } finally {
@@ -111,32 +197,47 @@ document.addEventListener('alpine:init', () => {
       }
     },
 
+    /** 打开新建用户弹窗并重置表单。 */
+    openCreate() {
+      this.form = { name: '', email: '', role: 'viewer' };
+      this.error = '';
+      this.openModal = 'createUser';
+    },
+
+    /** 提交新建用户。 */
+    async create() {
+      if (this.submitting) return;
+      this.submitting = true;
+      this.error = '';
+      try {
+        const user = await apiRequest('/api/users', {
+          method: 'POST',
+          body: JSON.stringify(this.form),
+        });
+        this.users.unshift(user);
+        this.openModal = null;
+        this.$dispatch('ada-toast', {
+          title: '创建成功',
+          message: `已创建用户 ${user.name}`,
+          type: 'success',
+        });
+      } catch (e) {
+        this.error = e.message;
+        this.$dispatch('ada-toast', { title: '创建失败', message: e.message, type: 'danger' });
+      } finally {
+        this.submitting = false;
+      }
+    },
+
     async remove(user) {
       try {
-        await this.request(`/api/users/${user.id}`, { method: 'DELETE' });
+        await apiRequest(`/api/users/${user.id}`, { method: 'DELETE' });
         this.users = this.users.filter((u) => u.id !== user.id);
         this.$dispatch('ada-toast', { title: '删除成功', message: `已删除用户 ${user.name}`, type: 'success' });
       } catch (e) {
         this.error = e.message;
         this.$dispatch('ada-toast', { title: '删除失败', message: e.message, type: 'danger' });
       }
-    },
-
-    /** 统一请求封装，自动处理错误。 */
-    async request(url, options = {}) {
-      const res = await fetch(url, {
-        headers: { 'Content-Type': 'application/json' },
-        ...options,
-      });
-      if (!res.ok) {
-        let message = `请求失败 (${res.status})`;
-        try {
-          const body = await res.json();
-          message = body?.error?.message || message;
-        } catch (_) { /* 忽略解析错误 */ }
-        throw new Error(message);
-      }
-      return res.status === 204 ? null : res.json();
     },
   }));
 
@@ -162,19 +263,7 @@ document.addEventListener('alpine:init', () => {
 
     async request(url, options = {}) {
       this.error = '';
-      const res = await fetch(url, {
-        headers: { 'Content-Type': 'application/json' },
-        ...options,
-      });
-      if (!res.ok) {
-        let message = `请求失败 (${res.status})`;
-        try {
-          const body = await res.json();
-          message = body?.error?.message || message;
-        } catch (_) { /* 忽略解析错误 */ }
-        throw new Error(message);
-      }
-      return res.status === 204 ? null : res.json();
+      return apiRequest(url, options);
     },
 
     async add() {
